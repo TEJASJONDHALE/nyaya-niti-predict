@@ -8,6 +8,7 @@ import CaseHistory from '@/components/CaseHistory';
 import { PredictionResult } from '@/utils/mockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Layout, FileText, BarChart3 } from 'lucide-react';
+import { Scale } from '@/components/Icons';
 
 const Index = () => {
   const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null);

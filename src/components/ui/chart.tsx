@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -353,6 +354,92 @@ function getPayloadConfigFromPayload(
     : config[key as keyof typeof config]
 }
 
+// Now let's export the necessary components that are being used in the Dashboard
+const PieChart = ({
+  data,
+  valueFormatter,
+  children,
+  ...props
+}: {
+  data: any[];
+  valueFormatter?: (value: number) => string;
+  children: React.ReactNode;
+} & React.ComponentProps<typeof RechartsPrimitive.PieChart>) => {
+  return (
+    <ChartContainer
+      config={{}}
+      {...props}
+    >
+      <RechartsPrimitive.PieChart>
+        <RechartsPrimitive.Pie
+          data={data}
+          dataKey="value"
+          nameKey="name"
+          cx="50%"
+          cy="50%"
+          outerRadius={80}
+          fill="#8884d8"
+          label
+        />
+        <ChartTooltip />
+        {children}
+      </RechartsPrimitive.PieChart>
+    </ChartContainer>
+  );
+};
+
+const PieArcSeries = () => {
+  return null; // This is a placeholder. In a real implementation, it would render arc segments
+};
+
+const BarChart = ({
+  data,
+  valueFormatter,
+  ...props
+}: {
+  data: any[];
+  valueFormatter?: (value: number) => string;
+} & React.ComponentProps<typeof RechartsPrimitive.BarChart>) => {
+  return (
+    <ChartContainer
+      config={{}}
+      {...props}
+    >
+      <RechartsPrimitive.BarChart data={data}>
+        <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+        <RechartsPrimitive.XAxis dataKey="name" />
+        <RechartsPrimitive.YAxis />
+        <ChartTooltip />
+        <RechartsPrimitive.Bar dataKey="value" fill="#8884d8" />
+      </RechartsPrimitive.BarChart>
+    </ChartContainer>
+  );
+};
+
+const AreaChart = ({
+  data,
+  valueFormatter,
+  ...props
+}: {
+  data: any[];
+  valueFormatter?: (value: number) => string;
+} & React.ComponentProps<typeof RechartsPrimitive.AreaChart>) => {
+  return (
+    <ChartContainer
+      config={{}}
+      {...props}
+    >
+      <RechartsPrimitive.AreaChart data={data}>
+        <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+        <RechartsPrimitive.XAxis dataKey="name" />
+        <RechartsPrimitive.YAxis />
+        <ChartTooltip />
+        <RechartsPrimitive.Area type="monotone" dataKey="value" fill="#8884d8" />
+      </RechartsPrimitive.AreaChart>
+    </ChartContainer>
+  );
+};
+
 export {
   ChartContainer,
   ChartTooltip,
@@ -360,4 +447,9 @@ export {
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
+  // Add the missing exports
+  PieChart,
+  BarChart,
+  AreaChart,
+  PieArcSeries
 }

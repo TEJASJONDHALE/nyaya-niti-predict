@@ -5,6 +5,7 @@ import { AreaChart, BarChart, PieChart, PieArcSeries } from '@/components/ui/cha
 import { Progress } from '@/components/ui/progress';
 import { statisticsData } from '@/utils/mockData';
 import { Award, Calendar, Clock, PieChart as PieChartIcon, BarChart3 } from 'lucide-react';
+import { FileText, Info } from '@/components/Icons';
 
 const Dashboard: React.FC = () => {
   // Extract data for charts
