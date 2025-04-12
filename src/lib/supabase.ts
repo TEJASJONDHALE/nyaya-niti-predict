@@ -13,3 +13,8 @@ export const supabase = createClient<Database>(
   supabaseUrl || '',
   supabaseAnonKey || ''
 );
+
+// Helper function to check if the Supabase connection is properly configured
+export const isSupabaseConfigured = () => {
+  return !!supabaseUrl && !!supabaseAnonKey;
+};

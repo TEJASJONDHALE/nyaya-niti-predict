@@ -2,6 +2,7 @@
 import { supabase } from '@/lib/supabase';
 import { PredictionResult } from '@/utils/mockData';
 
+// Save a case prediction to the database
 export const saveCasePrediction = async (
   caseDetails: {
     caseNumber: string;
@@ -56,6 +57,7 @@ export const saveCasePrediction = async (
   }
 };
 
+// Get a prediction from the backend
 export const getPrediction = async (
   caseType: string,
   witnessCount: number,
@@ -63,7 +65,7 @@ export const getPrediction = async (
 ): Promise<PredictionResult | null> => {
   try {
     // In a production app, you'd call a real ML model here
-    // For now, we'll use the mock prediction function to simulate the AI
+    // For now, we'll use the Supabase RPC function to simulate the AI
     const { data, error } = await supabase.rpc('predict_outcome', {
       case_type: caseType,
       witness_count: witnessCount,
@@ -87,6 +89,7 @@ export const getPrediction = async (
   }
 };
 
+// Get all cases for the current user
 export const getUserCases = async () => {
   try {
     const { data: cases, error: casesError } = await supabase
@@ -105,5 +108,35 @@ export const getUserCases = async () => {
   } catch (error) {
     console.error('Error fetching user cases:', error);
     return null;
+  }
+};
+
+// Delete a case prediction
+export const deleteCasePrediction = async (caseId: string) => {
+  try {
+    // First delete the prediction factors
+    const { error: factorsError } = await supabase
+      .from('prediction_factors')
+      .delete()
+      .eq('case_id', caseId);
+      
+    if (factorsError) {
+      throw factorsError;
+    }
+    
+    // Then delete the case
+    const { error: caseError } = await supabase
+      .from('cases')
+      .delete()
+      .eq('id', caseId);
+    
+    if (caseError) {
+      throw caseError;
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting case prediction:', error);
+    return { success: false, error };
   }
 };
