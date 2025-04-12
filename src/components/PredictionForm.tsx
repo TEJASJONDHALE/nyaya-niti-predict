@@ -6,9 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { caseTypes, courts, mockPrediction } from '@/utils/mockData';
+import { caseTypes, courts } from '@/utils/mockData';
 import { PredictionResult } from '@/utils/mockData';
 import { FileText, ArrowRight } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { getPrediction, saveCasePrediction } from '@/services/predictionService';
 
 interface PredictionFormProps {
   onPredict: (result: PredictionResult) => void;
@@ -21,17 +23,45 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
   const [witnessCount, setWitnessCount] = useState(3);
   const [evidenceStrength, setEvidenceStrength] = useState('Moderate');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate API call with delay
-    setTimeout(() => {
-      const result = mockPrediction(caseType, witnessCount, evidenceStrength);
+    try {
+      // Get prediction from our backend service
+      const result = await getPrediction(caseType, witnessCount, evidenceStrength);
+      
+      if (!result) {
+        throw new Error('Failed to get prediction');
+      }
+      
+      // Save the case and prediction to the database
+      const saveResult = await saveCasePrediction(
+        { caseNumber, caseType, court, witnessCount, evidenceStrength }, 
+        result
+      );
+      
+      if (!saveResult.success) {
+        console.warn('Prediction was generated but not saved to database');
+      }
+      
       onPredict(result);
+      toast({
+        title: 'Prediction Generated',
+        description: `Predicted outcome: ${result.outcome}`,
+      });
+    } catch (error) {
+      console.error('Error during prediction:', error);
+      toast({
+        title: 'Prediction Failed',
+        description: 'An error occurred while generating the prediction.',
+        variant: 'destructive',
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   return (
