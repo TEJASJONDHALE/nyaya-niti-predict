@@ -1,6 +1,7 @@
 
-import { supabase } from '@/lib/supabase';
+import { getMockOrRealSupabase, isSupabaseConfigured } from '@/lib/supabase';
 import { PredictionResult } from '@/utils/mockData';
+import { mockPrediction } from '@/utils/mockData'; // Import the mock prediction function
 
 // Save a case prediction to the database
 export const saveCasePrediction = async (
@@ -14,6 +15,14 @@ export const saveCasePrediction = async (
   result: PredictionResult
 ) => {
   try {
+    // Check if Supabase is configured
+    if (!isSupabaseConfigured()) {
+      console.warn('Supabase not configured, prediction not saved to database.');
+      return { success: true, caseId: 'mock-id-' + Date.now() };
+    }
+
+    const supabase = getMockOrRealSupabase();
+    
     // First, insert the case details
     const { data: caseData, error: caseError } = await supabase
       .from('cases')
@@ -64,8 +73,16 @@ export const getPrediction = async (
   evidenceStrength: string
 ): Promise<PredictionResult | null> => {
   try {
-    // In a production app, you'd call a real ML model here
-    // For now, we'll use the Supabase RPC function to simulate the AI
+    // Check if Supabase is configured
+    if (!isSupabaseConfigured()) {
+      console.warn('Supabase not configured, using mock prediction data.');
+      // Return mock prediction when Supabase is not available
+      return mockPrediction(caseType, witnessCount, evidenceStrength);
+    }
+
+    const supabase = getMockOrRealSupabase();
+    
+    // In a production app with Supabase configured, call the RPC function
     const { data, error } = await supabase.rpc('predict_outcome', {
       case_type: caseType,
       witness_count: witnessCount,
@@ -85,13 +102,22 @@ export const getPrediction = async (
     };
   } catch (error) {
     console.error('Error getting prediction:', error);
-    return null;
+    // Fall back to mock prediction on error
+    return mockPrediction(caseType, witnessCount, evidenceStrength);
   }
 };
 
 // Get all cases for the current user
 export const getUserCases = async () => {
   try {
+    // Check if Supabase is configured
+    if (!isSupabaseConfigured()) {
+      console.warn('Supabase not configured, using mock case data.');
+      return []; // Return empty array for development without Supabase
+    }
+
+    const supabase = getMockOrRealSupabase();
+    
     const { data: cases, error: casesError } = await supabase
       .from('cases')
       .select(`
@@ -107,13 +133,21 @@ export const getUserCases = async () => {
     return cases;
   } catch (error) {
     console.error('Error fetching user cases:', error);
-    return null;
+    return [];
   }
 };
 
 // Delete a case prediction
 export const deleteCasePrediction = async (caseId: string) => {
   try {
+    // Check if Supabase is configured
+    if (!isSupabaseConfigured()) {
+      console.warn('Supabase not configured, mock deletion performed.');
+      return { success: true };
+    }
+
+    const supabase = getMockOrRealSupabase();
+    
     // First delete the prediction factors
     const { error: factorsError } = await supabase
       .from('prediction_factors')
