@@ -1,7 +1,7 @@
-
-import { getMockOrRealSupabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { PredictionResult } from '@/utils/mockData';
 import { mockPrediction } from '@/utils/mockData'; // Import the mock prediction function
+import { isSupabaseConfigured, getMockOrRealSupabase } from '@/lib/supabase';
 
 // Save a case prediction to the database
 export const saveCasePrediction = async (

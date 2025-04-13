@@ -93,18 +93,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (signUpError) throw signUpError;
       
-      // Create user profile
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('user_profiles')
-          .insert({
-            id: data.user.id,
-            email,
-            full_name: fullName,
-            role: 'user',
-          });
+      // Create user profile - Only do this if we have a user returned
+      // We won't try to create a profile when email verification is enabled
+      // as the user isn't fully created until verified
+      if (data.user && data.session) {
+        try {
+          // Use the 'user_profiles' table - we need to check if it exists first
+          // If it doesn't exist, we can skip this step as the table may be created later
+          const { count, error: checkError } = await supabase
+            .from('user_profiles')
+            .select('*', { count: 'exact', head: true });
           
-        if (profileError) throw profileError;
+          if (checkError) {
+            console.warn('user_profiles table might not exist yet:', checkError.message);
+          } else if (count !== null) {
+            // Table exists, insert the profile
+            const { error: profileError } = await supabase
+              .from('user_profiles')
+              .insert({
+                id: data.user.id,
+                email,
+                full_name: fullName,
+                role: 'user',
+              });
+              
+            if (profileError) console.error('Error creating profile:', profileError);
+          }
+        } catch (profileError) {
+          console.error('Error checking or creating profile:', profileError);
+          // Non-critical error, continue with sign up
+        }
       }
       
       toast({
