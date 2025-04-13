@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from 'lucide-react';
 
 interface SignUpFormProps {
   onSwitchToSignIn: () => void;
@@ -17,18 +19,16 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { signUp } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
     if (password !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match.",
-        variant: "destructive",
-      });
+      setError("Passwords don't match. Please make sure your passwords match.");
       return;
     }
 
@@ -37,12 +37,13 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
     try {
       await signUp(email, password, fullName);
       toast({
-        title: "Check your email",
-        description: "We sent you a verification link to complete your registration.",
+        title: "Sign up successful",
+        description: "Please check your email for verification.",
       });
       onSwitchToSignIn(); // Switch to sign in after successful registration
-    } catch (error) {
-      // Error handling is done in the AuthContext
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      setError(error.message || "An error occurred during sign up. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -57,6 +58,12 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="fullName">Full Name</Label>
