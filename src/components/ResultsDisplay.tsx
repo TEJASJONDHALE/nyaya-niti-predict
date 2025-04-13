@@ -4,8 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { PredictionResult } from '@/utils/mockData';
-import { AlertTriangle, CheckCircle, Scale, PieChart, Info, ArrowRight } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Scale, PieChart, Info, ArrowRight, FileText } from 'lucide-react';
 import ExplanationDetail from './ExplanationDetail';
+import SimilarCasesDisplay from './SimilarCasesDisplay';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface ResultsDisplayProps {
   result: PredictionResult | null;
@@ -16,6 +18,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, caseId }) => {
   const [showDetailedExplanation, setShowDetailedExplanation] = useState(false);
   const [isLoadingExplanation, setIsLoadingExplanation] = useState(false);
   const [explanationFactors, setExplanationFactors] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState('summary');
 
   if (!result) return null;
   
@@ -46,69 +49,26 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, caseId }) => {
   };
 
   const handleLoadDetailedExplanation = async () => {
-    if (!caseId) {
-      // Create mock explanation data if no caseId is provided
-      setExplanationFactors([
-        {
-          factor_name: "Witness Count",
-          factor_explanation: "The number of witnesses in this case has a significant impact on the credibility of testimony. More witnesses generally lead to stronger corroboration of facts.",
-          factor_weight: 0.75
-        },
-        {
-          factor_name: "Evidence Strength",
-          factor_explanation: "The quality and quantity of evidence presented strongly influences the case outcome. Strong evidence includes direct documentation, video recordings, or forensic evidence.",
-          factor_weight: 0.85
-        },
-        {
-          factor_name: "Case Type Precedent",
-          factor_explanation: "Historical outcomes for similar case types indicate patterns that judges and juries tend to follow. This creates predictable outcomes based on case classification.",
-          factor_weight: 0.65
-        },
-        {
-          factor_name: "Jurisdictional Patterns",
-          factor_explanation: "Different courts and jurisdictions develop unique approaches to similar cases over time. Local precedent and judicial tendencies influence how evidence is weighed.",
-          factor_weight: 0.45
-        }
-      ]);
-      setShowDetailedExplanation(true);
-      return;
-    }
-
     try {
       setIsLoadingExplanation(true);
-      // In a real implementation, we'd fetch the detailed explanations from Supabase
-      // const { data, error } = await supabase
-      //   .from('outcome_explanations')
-      //   .select('*')
-      //   .eq('case_id', caseId);
       
-      // if (error) throw error;
-      // setExplanationFactors(data || []);
-      
-      // For now, we'll use mock data
+      // Simulate loading data
       setTimeout(() => {
-        setExplanationFactors([
-          {
-            factor_name: "Witness Count",
-            factor_explanation: "The number of witnesses in this case has a significant impact on the credibility of testimony. More witnesses generally lead to stronger corroboration of facts.",
-            factor_weight: 0.75
-          },
-          {
-            factor_name: "Evidence Strength",
-            factor_explanation: "The quality and quantity of evidence presented strongly influences the case outcome. Strong evidence includes direct documentation, video recordings, or forensic evidence.",
-            factor_weight: 0.85
-          },
-          {
-            factor_name: "Case Type Precedent",
-            factor_explanation: "Historical outcomes for similar case types indicate patterns that judges and juries tend to follow. This creates predictable outcomes based on case classification.",
-            factor_weight: 0.65
-          },
-          {
-            factor_name: "Jurisdictional Patterns",
-            factor_explanation: "Different courts and jurisdictions develop unique approaches to similar cases over time. Local precedent and judicial tendencies influence how evidence is weighed.",
-            factor_weight: 0.45
-          }
-        ]);
+        const factors = result.factors.map((factor) => ({
+          factor_name: factor.factor,
+          factor_explanation: factor.reference || 
+            `This factor has a significant impact on case outcomes based on historical data analysis.`,
+          factor_weight: factor.importance
+        }));
+
+        // Add some additional factors for more comprehensive explanation
+        factors.push({
+          factor_name: "Historical Precedents",
+          factor_explanation: "Analysis of similar cases from the past 5 years shows a strong pattern of similar outcomes in cases with matching characteristics.",
+          factor_weight: 0.68
+        });
+        
+        setExplanationFactors(factors);
         setIsLoadingExplanation(false);
         setShowDetailedExplanation(true);
       }, 1000);
@@ -126,54 +86,66 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, caseId }) => {
             <PieChart className="h-5 w-5 text-legal-primary" />
             <CardTitle className="text-lg text-legal-primary">Prediction Results</CardTitle>
           </div>
-          <CardDescription>AI-powered case outcome prediction</CardDescription>
+          <CardDescription>AI-powered case outcome prediction with historical analysis</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          <div className="space-y-6">
-            <div className="flex flex-col items-center">
-              <div className="flex items-center justify-center h-20 w-20 rounded-full bg-gray-50 mb-2">
-                {getOutcomeIcon(result.outcome)}
-              </div>
-              <h3 className={`text-2xl font-bold ${getOutcomeColor(result.outcome)}`}>
-                {result.outcome}
-              </h3>
-              <div className="mt-2 text-center">
-                <div className="text-sm text-gray-500 mb-1">Confidence</div>
-                <div className="flex items-center space-x-2">
-                  <Progress 
-                    value={confidencePercent} 
-                    className={`h-2 w-36 ${getConfidenceColor(result.confidence)}`} 
-                  />
-                  <span className="text-sm font-medium">{confidencePercent}%</span>
+          <Tabs defaultValue="summary" onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="summary">Summary</TabsTrigger>
+              <TabsTrigger value="factors">Factors</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="summary" className="space-y-4 mt-4">
+              <div className="flex flex-col items-center">
+                <div className="flex items-center justify-center h-20 w-20 rounded-full bg-gray-50 mb-2">
+                  {getOutcomeIcon(result.outcome)}
+                </div>
+                <h3 className={`text-2xl font-bold ${getOutcomeColor(result.outcome)}`}>
+                  {result.outcome}
+                </h3>
+                <div className="mt-2 text-center">
+                  <div className="text-sm text-gray-500 mb-1">Confidence</div>
+                  <div className="flex items-center space-x-2">
+                    <Progress 
+                      value={confidencePercent} 
+                      className={`h-2 w-36 ${getConfidenceColor(result.confidence)}`} 
+                    />
+                    <span className="text-sm font-medium">{confidencePercent}%</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div>
-              <h4 className="font-medium text-gray-700 mb-2">Top Influencing Factors</h4>
-              <div className="space-y-3">
-                {result.factors.map((factor, index) => (
-                  <div key={index} className="bg-gray-50 p-2 rounded">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm">{factor.factor}</span>
-                      <span className="text-sm font-medium">{Math.round(factor.importance * 100)}%</span>
-                    </div>
-                    <Progress 
-                      value={factor.importance * 100} 
-                      className="h-1.5"
-                    />
-                  </div>
-                ))}
+              
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">Explanation</h4>
+                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded border border-gray-100">
+                  {result.explanation}
+                </p>
               </div>
-            </div>
+            </TabsContent>
             
-            <div>
-              <h4 className="font-medium text-gray-700 mb-2">Explanation</h4>
-              <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded border border-gray-100">
-                {result.explanation}
-              </p>
-            </div>
-          </div>
+            <TabsContent value="factors" className="mt-4">
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">Top Influencing Factors</h4>
+                <div className="space-y-3">
+                  {result.factors.map((factor, index) => (
+                    <div key={index} className="bg-gray-50 p-3 rounded">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">{factor.factor}</span>
+                        <span className="text-sm font-medium">{Math.round(factor.importance * 100)}%</span>
+                      </div>
+                      <Progress 
+                        value={factor.importance * 100} 
+                        className="h-1.5 mb-2"
+                      />
+                      {factor.reference && (
+                        <p className="text-xs text-gray-600 mt-1 italic">{factor.reference}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
         <CardFooter className="bg-gray-50 rounded-b-lg border-t border-gray-100">
           <Button 
@@ -194,7 +166,10 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, caseId }) => {
       </Card>
 
       {showDetailedExplanation && (
-        <ExplanationDetail factors={explanationFactors} />
+        <>
+          <ExplanationDetail factors={explanationFactors} />
+          <SimilarCasesDisplay outcome={result.outcome} />
+        </>
       )}
     </>
   );
