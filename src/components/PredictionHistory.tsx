@@ -2,10 +2,12 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { getUserCases } from '@/services/predictionService';
-import { FileText, ChevronRight, Clock } from 'lucide-react';
+import { getUserCases, deleteCasePrediction, getExplanationsForCase } from '@/services/predictionService';
+import { FileText, ChevronRight, Clock, Trash2, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import ExplanationDetail from './ExplanationDetail';
 
 type CasePrediction = {
   id: string;
@@ -15,6 +17,8 @@ type CasePrediction = {
   court: string;
   outcome: string;
   confidence: number;
+  witness_count: number;
+  evidence_strength: string;
   prediction_factors: {
     factor: string;
     importance: number;
@@ -24,6 +28,9 @@ type CasePrediction = {
 const PredictionHistory = () => {
   const [predictions, setPredictions] = useState<CasePrediction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [explanations, setExplanations] = useState<any[]>([]);
+  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
+  const [isLoadingExplanation, setIsLoadingExplanation] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,6 +54,62 @@ const PredictionHistory = () => {
 
     fetchPredictions();
   }, [toast]);
+
+  const handleDeletePrediction = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const result = await deleteCasePrediction(id);
+      if (result.success) {
+        setPredictions(predictions.filter(p => p.id !== id));
+        toast({
+          title: 'Prediction Deleted',
+          description: 'The prediction has been deleted successfully.',
+        });
+      } else {
+        throw new Error('Failed to delete prediction');
+      }
+    } catch (error) {
+      console.error('Error deleting prediction:', error);
+      toast({
+        title: 'Delete Failed',
+        description: 'Could not delete the prediction.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleViewExplanation = async (caseId: string) => {
+    setSelectedCaseId(caseId);
+    setIsLoadingExplanation(true);
+    
+    try {
+      const data = await getExplanationsForCase(caseId);
+      setExplanations(data);
+    } catch (error) {
+      console.error('Error loading explanations:', error);
+      toast({
+        title: 'Failed to Load Explanation',
+        description: 'Could not retrieve the detailed explanation.',
+        variant: 'destructive',
+      });
+      
+      // Use mock data as fallback
+      setExplanations([
+        {
+          factor_name: "Witness Count",
+          factor_explanation: "The number of witnesses in this case has a significant impact on the credibility of testimony.",
+          factor_weight: 0.7
+        },
+        {
+          factor_name: "Evidence Strength",
+          factor_explanation: "The quality and quantity of evidence presented strongly influences the case outcome.",
+          factor_weight: 0.8
+        }
+      ]);
+    } finally {
+      setIsLoadingExplanation(false);
+    }
+  };
 
   const getOutcomeColorClass = (outcome: string) => {
     switch (outcome) {
@@ -91,7 +154,7 @@ const PredictionHistory = () => {
         <CardTitle className="text-lg flex items-center">
           <Clock className="h-5 w-5 mr-2" /> Prediction History
         </CardTitle>
-        <CardDescription>Your recent case predictions</CardDescription>
+        <CardDescription>Your recent case predictions with detailed explanations</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -104,6 +167,9 @@ const PredictionHistory = () => {
                 <div>
                   <h4 className="font-medium">{prediction.case_number}</h4>
                   <p className="text-sm text-gray-500">{prediction.case_type} • {prediction.court}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Witnesses: {prediction.witness_count} • Evidence: {prediction.evidence_strength}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className={`font-semibold ${getOutcomeColorClass(prediction.outcome)}`}>
@@ -134,9 +200,44 @@ const PredictionHistory = () => {
                 </div>
               </div>
               
-              <div className="mt-3 flex justify-end">
-                <Button variant="ghost" size="sm" className="text-xs">
-                  View Details <ChevronRight className="h-3 w-3 ml-1" />
+              <div className="mt-3 flex justify-end gap-2">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs"
+                      onClick={() => handleViewExplanation(prediction.id)}
+                    >
+                      <Eye className="h-3 w-3 mr-1" />
+                      View AI Explanation
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-xl">
+                    <DialogHeader>
+                      <DialogTitle>Detailed AI Explanation</DialogTitle>
+                      <DialogDescription>
+                        Analysis of factors affecting the case outcome prediction
+                      </DialogDescription>
+                    </DialogHeader>
+                    {isLoadingExplanation ? (
+                      <div className="flex justify-center items-center py-10">
+                        <p>Loading detailed explanation...</p>
+                      </div>
+                    ) : (
+                      <ExplanationDetail factors={explanations} />
+                    )}
+                  </DialogContent>
+                </Dialog>
+                
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                  onClick={(e) => handleDeletePrediction(prediction.id, e)}
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Delete
                 </Button>
               </div>
             </div>

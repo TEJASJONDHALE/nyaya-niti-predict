@@ -137,6 +137,44 @@ export const getUserCases = async () => {
   }
 };
 
+// Get detailed explanations for a case
+export const getExplanationsForCase = async (caseId: string) => {
+  try {
+    if (!isSupabaseConfigured()) {
+      console.warn('Supabase not configured, using mock explanation data.');
+      // Return mock explanations for development
+      return [
+        {
+          factor_name: "Witness Count",
+          factor_explanation: "The number of witnesses significantly impacts the credibility of testimony.",
+          factor_weight: 0.7
+        },
+        {
+          factor_name: "Evidence Strength",
+          factor_explanation: "Strong evidence provides clear and convincing proof that significantly impacts the case outcome.",
+          factor_weight: 0.85
+        }
+      ];
+    }
+
+    const supabase = getMockOrRealSupabase();
+    
+    const { data, error } = await supabase
+      .from('outcome_explanations')
+      .select('*')
+      .eq('case_id', caseId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching explanations:', error);
+    return [];
+  }
+};
+
 // Delete a case prediction
 export const deleteCasePrediction = async (caseId: string) => {
   try {
@@ -156,6 +194,16 @@ export const deleteCasePrediction = async (caseId: string) => {
       
     if (factorsError) {
       throw factorsError;
+    }
+    
+    // Then delete any detailed explanations
+    const { error: explanationsError } = await supabase
+      .from('outcome_explanations')
+      .delete()
+      .eq('case_id', caseId);
+      
+    if (explanationsError) {
+      throw explanationsError;
     }
     
     // Then delete the case

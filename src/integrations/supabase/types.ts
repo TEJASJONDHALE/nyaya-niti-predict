@@ -9,13 +9,177 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      case_data: {
+        Row: {
+          case_duration: number | null
+          case_number: string
+          created_at: string
+          evidence_strength: string
+          id: string
+          judge_experience: number | null
+          outcome: string
+          witness_count: number
+        }
+        Insert: {
+          case_duration?: number | null
+          case_number: string
+          created_at?: string
+          evidence_strength: string
+          id?: string
+          judge_experience?: number | null
+          outcome: string
+          witness_count: number
+        }
+        Update: {
+          case_duration?: number | null
+          case_number?: string
+          created_at?: string
+          evidence_strength?: string
+          id?: string
+          judge_experience?: number | null
+          outcome?: string
+          witness_count?: number
+        }
+        Relationships: []
+      }
+      cases: {
+        Row: {
+          case_number: string
+          case_type: string
+          confidence: number | null
+          court: string
+          created_at: string
+          evidence_strength: string
+          explanation: string | null
+          id: string
+          outcome: string | null
+          user_id: string | null
+          witness_count: number
+        }
+        Insert: {
+          case_number: string
+          case_type: string
+          confidence?: number | null
+          court: string
+          created_at?: string
+          evidence_strength: string
+          explanation?: string | null
+          id?: string
+          outcome?: string | null
+          user_id?: string | null
+          witness_count: number
+        }
+        Update: {
+          case_number?: string
+          case_type?: string
+          confidence?: number | null
+          court?: string
+          created_at?: string
+          evidence_strength?: string
+          explanation?: string | null
+          id?: string
+          outcome?: string | null
+          user_id?: string | null
+          witness_count?: number
+        }
+        Relationships: []
+      }
+      outcome_explanations: {
+        Row: {
+          case_id: string
+          created_at: string
+          factor_explanation: string
+          factor_name: string
+          factor_weight: number
+          id: string
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          factor_explanation: string
+          factor_name: string
+          factor_weight: number
+          id?: string
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          factor_explanation?: string
+          factor_name?: string
+          factor_weight?: number
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outcome_explanations_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prediction_factors: {
+        Row: {
+          case_id: string
+          created_at: string
+          factor: string
+          id: string
+          importance: number
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          factor: string
+          id?: string
+          importance: number
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          factor?: string
+          id?: string
+          importance?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_factors_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_factor_explanations: {
+        Args: {
+          p_case_id: string
+          p_case_type: string
+          p_witness_count: number
+          p_evidence_strength: string
+        }
+        Returns: {
+          case_id: string
+          created_at: string
+          factor_explanation: string
+          factor_name: string
+          factor_weight: number
+          id: string
+        }[]
+      }
+      predict_outcome: {
+        Args: {
+          case_type: string
+          witness_count: number
+          evidence_strength: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

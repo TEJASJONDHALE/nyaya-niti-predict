@@ -11,9 +11,11 @@ import { PredictionResult } from '@/utils/mockData';
 import { FileText, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getPrediction, saveCasePrediction } from '@/services/predictionService';
+import { supabase } from '@/integrations/supabase/client';
+import { isSupabaseConfigured } from '@/lib/supabase';
 
 interface PredictionFormProps {
-  onPredict: (result: PredictionResult) => void;
+  onPredict: (result: PredictionResult, caseId?: string) => void;
 }
 
 const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
@@ -37,17 +39,38 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
         throw new Error('Failed to get prediction');
       }
       
+      let caseId;
+      
       // Save the case and prediction to the database
       const saveResult = await saveCasePrediction(
         { caseNumber, caseType, court, witnessCount, evidenceStrength }, 
         result
       );
       
-      if (!saveResult.success) {
+      if (saveResult.success) {
+        caseId = saveResult.caseId;
+        
+        // If Supabase is configured and we have a case ID, generate detailed explanations
+        if (isSupabaseConfigured() && caseId) {
+          try {
+            await supabase.rpc('generate_factor_explanations', {
+              p_case_id: caseId,
+              p_case_type: caseType,
+              p_witness_count: witnessCount,
+              p_evidence_strength: evidenceStrength
+            });
+          } catch (error) {
+            console.error('Error generating detailed explanation:', error);
+            // Non-critical error, so we continue
+          }
+        }
+      } else {
         console.warn('Prediction was generated but not saved to database');
       }
       
-      onPredict(result);
+      // Pass the caseId to allow fetching detailed explanations
+      onPredict(result, caseId);
+      
       toast({
         title: 'Prediction Generated',
         description: `Predicted outcome: ${result.outcome}`,
