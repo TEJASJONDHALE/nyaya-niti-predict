@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -32,7 +31,6 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
     setIsSubmitting(true);
     
     try {
-      // Get prediction from our backend service
       const result = await getPrediction(caseType, witnessCount, evidenceStrength);
       
       if (!result) {
@@ -41,7 +39,6 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
       
       let caseId;
       
-      // Save the case and prediction to the database
       const saveResult = await saveCasePrediction(
         { caseNumber, caseType, court, witnessCount, evidenceStrength }, 
         result
@@ -50,7 +47,6 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
       if (saveResult.success) {
         caseId = saveResult.caseId;
         
-        // If Supabase is configured and we have a case ID, generate detailed explanations
         if (isSupabaseConfigured() && caseId) {
           try {
             await supabase.rpc('generate_factor_explanations', {
@@ -61,14 +57,12 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
             });
           } catch (error) {
             console.error('Error generating detailed explanation:', error);
-            // Non-critical error, so we continue
           }
         }
       } else {
         console.warn('Prediction was generated but not saved to database');
       }
       
-      // Pass the caseId to allow fetching detailed explanations
       onPredict(result, caseId);
       
       toast({

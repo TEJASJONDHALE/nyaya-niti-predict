@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { PredictionResult } from '@/utils/mockData';
 import { mockPrediction } from '@/utils/mockData'; // Import the mock prediction function
@@ -93,12 +94,21 @@ export const getPrediction = async (
       throw error;
     }
 
+    // Type the response data more explicitly to handle JSON properties
+    // This avoids TypeScript errors when accessing properties from the data
+    const typedData = data as {
+      outcome: string;
+      confidence: number;
+      explanation: string;
+      factors: { factor: string; importance: number }[];
+    };
+
     // Format the result to match our PredictionResult type
     return {
-      outcome: data.outcome,
-      confidence: data.confidence,
-      explanation: data.explanation,
-      factors: data.factors as { factor: string; importance: number }[]
+      outcome: typedData.outcome,
+      confidence: typedData.confidence,
+      explanation: typedData.explanation,
+      factors: typedData.factors
     };
   } catch (error) {
     console.error('Error getting prediction:', error);
