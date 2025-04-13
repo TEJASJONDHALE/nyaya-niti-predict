@@ -1,3 +1,4 @@
+
 export const caseTypes = [
   'Criminal - Theft',
   'Civil - Property Dispute',
@@ -53,6 +54,35 @@ export const sampleCases = [
     duration: 120,
   },
 ];
+
+// Add the missing statisticsData export
+export const statisticsData = {
+  casesByOutcome: {
+    'Conviction': 350,
+    'Settlement': 460,
+    'Acquittal': 190
+  },
+  averageDurationByType: {
+    'Criminal - Theft': 120,
+    'Civil - Property Dispute': 180,
+    'Family - Divorce': 90,
+    'Contract - Breach': 145,
+    'Employment - Wrongful Termination': 160
+  },
+  accuracyByCourtType: {
+    'Supreme Court': 0.91,
+    'High Court': 0.87,
+    'District Court': 0.82,
+    'Magistrate Court': 0.79,
+    'Tribunal': 0.85
+  },
+  topFactors: [
+    { factor: 'Evidence Strength', importance: 0.85 },
+    { factor: 'Witness Count', importance: 0.72 },
+    { factor: 'Prior Precedents', importance: 0.65 },
+    { factor: 'Legal Representation', importance: 0.58 }
+  ]
+};
 
 // Mock function to generate predictions when Supabase is not available
 export const mockPrediction = (
