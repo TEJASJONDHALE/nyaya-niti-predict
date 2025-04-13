@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, AlertCircle, Lightbulb } from "lucide-react";
+import { BookOpen, AlertCircle, Lightbulb, Scale, FileText } from "lucide-react";
 
 type ExplanationFactor = {
   factor_name: string;
@@ -31,12 +31,19 @@ const ExplanationDetail: React.FC<ExplanationDetailProps> = ({ factors }) => {
   // Sort factors by weight (most important first)
   const sortedFactors = [...factors].sort((a, b) => b.factor_weight - a.factor_weight);
 
+  const getFactorIcon = (factorName: string) => {
+    if (factorName.includes("Witness")) return <FileText className="h-4 w-4 mr-2 text-blue-500" />;
+    if (factorName.includes("Evidence")) return <AlertCircle className="h-4 w-4 mr-2 text-red-500" />;
+    if (factorName.includes("Precedent") || factorName.includes("Historical")) return <Scale className="h-4 w-4 mr-2 text-purple-500" />;
+    return <Lightbulb className="h-4 w-4 mr-2 text-amber-500" />;
+  };
+
   return (
     <Card className="mt-4">
       <CardHeader className="pb-3">
         <div className="flex items-center">
           <BookOpen className="h-5 w-5 mr-2 text-legal-primary" />
-          <CardTitle className="text-lg">Detailed Case Analysis</CardTitle>
+          <CardTitle className="text-lg">AI-Generated Case Analysis</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
@@ -45,7 +52,7 @@ const ExplanationDetail: React.FC<ExplanationDetailProps> = ({ factors }) => {
             <div key={index} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
-                  <Lightbulb className="h-4 w-4 mr-2 text-amber-500" />
+                  {getFactorIcon(factor.factor_name)}
                   <h3 className="font-medium">{factor.factor_name}</h3>
                 </div>
                 <span className="text-sm bg-gray-100 px-2 py-1 rounded-full">
