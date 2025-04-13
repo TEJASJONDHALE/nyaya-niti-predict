@@ -15,11 +15,17 @@ export const courts = [
   'Tribunal',
 ];
 
+export type PredictionFactor = {
+  factor: string;
+  importance: number;
+  reference?: string;
+};
+
 export type PredictionResult = {
   outcome: string;
   confidence: number;
   explanation: string;
-  factors: { factor: string; importance: number }[];
+  factors: PredictionFactor[];
 };
 
 export const sampleCases = [
@@ -123,23 +129,27 @@ export const mockPrediction = (
   // Generate mock explanation
   const explanation = `Based on the ${witnessCount} witnesses and ${evidenceStrength.toLowerCase()} evidence provided in this ${caseType.toLowerCase()} case, our model predicts a ${outcome.toLowerCase()} outcome with ${Math.round(confidence * 100)}% confidence.`;
   
-  // Generate mock factors
-  const factors = [
+  // Generate mock factors with references
+  const factors: PredictionFactor[] = [
     {
       factor: 'Witness Count',
-      importance: witnessCount > 3 ? 0.7 : 0.3
+      importance: witnessCount > 3 ? 0.7 : 0.3,
+      reference: witnessCount > 3 ? 'Case precedents show that over 3 witnesses significantly increase conviction rates.' : 'Cases with fewer witnesses tend to have lower conviction rates.'
     },
     {
       factor: 'Evidence Strength',
-      importance: evidenceStrength === 'Strong' ? 0.8 : evidenceStrength === 'Moderate' ? 0.5 : 0.2
+      importance: evidenceStrength === 'Strong' ? 0.8 : evidenceStrength === 'Moderate' ? 0.5 : 0.2,
+      reference: evidenceStrength === 'Strong' ? 'Strong evidence is the most important factor in determining case outcomes.' : 'Weak evidence significantly reduces conviction probability.'
     },
     {
       factor: 'Case Type Precedents',
-      importance: 0.6
+      importance: 0.6,
+      reference: `Historical data shows ${caseType} cases have distinct patterns in judicial outcomes.`
     },
     {
       factor: 'Jurisdictional Patterns',
-      importance: 0.4
+      importance: 0.4,
+      reference: 'Court-specific tendencies influence case resolutions across similar case types.'
     }
   ];
   

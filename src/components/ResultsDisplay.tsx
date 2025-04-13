@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { PredictionResult } from '@/utils/mockData';
+import { PredictionResult, PredictionFactor } from '@/utils/mockData';
 import { AlertTriangle, CheckCircle, Scale, PieChart, Info, ArrowRight, FileText } from 'lucide-react';
 import ExplanationDetail from './ExplanationDetail';
 import SimilarCasesDisplay from './SimilarCasesDisplay';

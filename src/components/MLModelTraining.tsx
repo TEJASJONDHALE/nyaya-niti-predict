@@ -14,6 +14,7 @@ const MLModelTraining = () => {
   const [trainingProgress, setTrainingProgress] = useState(0);
   const [modelTrained, setModelTrained] = useState(false);
   const [modelAccuracy, setModelAccuracy] = useState(0);
+  const [activeTab, setActiveTab] = useState('upload');
   const { toast } = useToast();
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,6 +98,10 @@ const MLModelTraining = () => {
     }
   };
 
+  const navigateToTab = (tabValue: string) => {
+    setActiveTab(tabValue);
+  };
+
   return (
     <Card className="mb-6">
       <CardHeader className="bg-gray-50 rounded-t-lg border-b border-gray-100">
@@ -107,7 +112,7 @@ const MLModelTraining = () => {
         <CardDescription>Train the case prediction model using CSV data</CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
-        <Tabs defaultValue="upload" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid grid-cols-3 mb-4">
             <TabsTrigger value="upload">Upload Data</TabsTrigger>
             <TabsTrigger value="train">Train Model</TabsTrigger>
@@ -143,7 +148,7 @@ const MLModelTraining = () => {
             </div>
             
             <div className="flex justify-end">
-              <Button onClick={() => document.querySelector('[data-value="train"]')?.click()}>
+              <Button onClick={() => navigateToTab('train')}>
                 Next <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
@@ -181,7 +186,7 @@ const MLModelTraining = () => {
             ) : (
               <div className="text-center py-8">
                 <p className="text-gray-500 mb-4">No CSV file selected</p>
-                <Button variant="outline" onClick={() => document.querySelector('[data-value="upload"]')?.click()}>
+                <Button variant="outline" onClick={() => navigateToTab('upload')}>
                   Go to Upload
                 </Button>
               </div>
@@ -189,7 +194,7 @@ const MLModelTraining = () => {
             
             {modelTrained && (
               <div className="flex justify-end">
-                <Button onClick={() => document.querySelector('[data-value="results"]')?.click()}>
+                <Button onClick={() => navigateToTab('results')}>
                   View Results <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
