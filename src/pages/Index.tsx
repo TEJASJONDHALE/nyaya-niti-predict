@@ -17,7 +17,6 @@ import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null);
-  const [modelTrained, setModelTrained] = useState(false);
   const { signOut, user } = useAuth();
 
   const handlePredict = (result: PredictionResult) => {
@@ -68,7 +67,7 @@ const Index = () => {
           <TabsContent value="predict" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
-                <PredictionForm onPredict={handlePredict} modelTrained={modelTrained} />
+                <PredictionForm onPredict={handlePredict} />
               </div>
               <div>
                 <ResultsDisplay result={predictionResult} />

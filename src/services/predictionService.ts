@@ -116,3 +116,94 @@ export const getSimilarCases = async (
   console.log(`Finding similar cases for ${outcome} in ${caseType}`);
   return [];
 };
+
+// Get user's prediction history
+export const getUserCases = async () => {
+  try {
+    // In a production app with Supabase, we would fetch the user's case history
+    // For now, return some mock data
+    return [
+      {
+        id: '1',
+        created_at: new Date().toISOString(),
+        case_number: 'CR-2023-1234',
+        case_type: 'Criminal - Theft',
+        court: 'District Court',
+        outcome: 'Conviction',
+        confidence: 0.82,
+        witness_count: 4,
+        evidence_strength: 'Strong',
+        prediction_factors: [
+          { factor: 'Evidence Strength', importance: 0.85 },
+          { factor: 'Witness Count', importance: 0.72 },
+          { factor: 'Case Precedents', importance: 0.65 }
+        ]
+      },
+      {
+        id: '2',
+        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        case_number: 'CV-2023-5678',
+        case_type: 'Civil - Property Dispute',
+        court: 'High Court',
+        outcome: 'Settlement',
+        confidence: 0.75,
+        witness_count: 2,
+        evidence_strength: 'Moderate',
+        prediction_factors: [
+          { factor: 'Evidence Strength', importance: 0.65 },
+          { factor: 'Legal Precedent', importance: 0.80 },
+          { factor: 'Court Tendencies', importance: 0.70 }
+        ]
+      }
+    ];
+  } catch (error) {
+    console.error('Error fetching user cases:', error);
+    return [];
+  }
+};
+
+// Delete a case prediction
+export const deleteCasePrediction = async (id: string) => {
+  try {
+    // In a production app with Supabase, we would delete the case
+    // For now, just simulate a successful deletion
+    console.log(`Deleting case prediction with ID: ${id}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting prediction:', error);
+    return { success: false };
+  }
+};
+
+// Get detailed explanations for a specific case
+export const getExplanationsForCase = async (caseId: string) => {
+  try {
+    // In a production app, we would fetch real data for the specific case
+    console.log(`Fetching explanations for case: ${caseId}`);
+    return [
+      {
+        factor_name: "Evidence Strength",
+        factor_explanation: "The quality of evidence presented was a significant factor. Analysis of 312 similar cases shows that strong evidence increased conviction rates by 78%.",
+        factor_weight: 0.85
+      },
+      {
+        factor_name: "Witness Credibility",
+        factor_explanation: "The credibility of witness testimony had substantial impact. In 237 analyzed cases, credible witness testimony increased successful outcomes by 62%.",
+        factor_weight: 0.75
+      },
+      {
+        factor_name: "Legal Precedents",
+        factor_explanation: "Previous similar cases established strong precedents that influenced this outcome. Analysis of 189 precedent cases showed consistent rulings in 72% of instances.",
+        factor_weight: 0.65
+      },
+      {
+        factor_name: "Court Jurisdiction Patterns",
+        factor_explanation: "Statistical analysis of 243 cases in this jurisdiction reveals consistent tendencies in how this court handles similar cases.",
+        factor_weight: 0.55
+      }
+    ];
+  } catch (error) {
+    console.error('Error fetching explanations:', error);
+    return [];
+  }
+};

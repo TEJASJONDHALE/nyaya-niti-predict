@@ -54,12 +54,7 @@ const MLModelTraining = () => {
           </TabsContent>
           
           <TabsContent value="train" className="space-y-4">
-            <TrainingSection 
-              csvFile={csvFile}
-              isTraining={isTraining}
-              trainingProgress={trainingProgress}
-              handleTrainModel={handleTrainModel}
-            />
+            <TrainingSection />
             
             {modelTrained && (
               <div className="flex justify-end">
