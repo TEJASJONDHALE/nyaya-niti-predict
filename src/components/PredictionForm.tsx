@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -50,35 +49,30 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
     setIsSubmitting(true);
     
     try {
-      const result = await getPrediction(`Criminal - ${crimeType}`, witnessCount, evidenceStrength);
+      // Pass case facts to the prediction service
+      const result = await getPrediction(
+        `Criminal - ${crimeType}`, 
+        witnessCount, 
+        evidenceStrength,
+        caseFacts
+      );
       
       if (!result) {
         throw new Error('Failed to get prediction');
       }
       
-      // Enhance the prediction with more context based on case facts
-      const enhancedResult = {
-        ...result,
-        explanation: `Based on the provided case facts: "${caseFacts}", our AI model predicts a ${result.outcome.toLowerCase()} outcome with ${result.confidence * 100}% confidence. The combination of ${witnessCount} witnesses and ${evidenceStrength.toLowerCase()} evidence in this ${crimeType.toLowerCase()} case is a significant factor in this prediction. ${result.explanation}`,
-        statisticalContext: generateStatisticalContext(crimeType, court, witnessCount, evidenceStrength),
-        factors: result.factors.map(factor => ({
-          ...factor,
-          reference: factor.reference || `Based on ${Math.floor(Math.random() * 50) + 20} similar criminal cases with matching criteria.`
-        }))
-      };
-      
       // Send prediction to parent component
-      onPredict(enhancedResult);
+      onPredict(result);
       
       toast({
-        title: 'Prediction Generated',
-        description: `Predicted outcome: ${result.outcome}`,
+        title: 'AI Prediction Generated',
+        description: `Predicted outcome: ${result.outcome} with ${Math.round(result.confidence * 100)}% confidence`,
       });
     } catch (error) {
       console.error('Error during prediction:', error);
       toast({
-        title: 'Prediction Failed',
-        description: 'An error occurred while generating the prediction.',
+        title: 'AI Prediction Failed',
+        description: 'An error occurred while generating the prediction with OpenRouter AI.',
         variant: 'destructive',
       });
     } finally {
@@ -142,7 +136,6 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
       </CardHeader>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Move Case Facts to the top and mark as required */}
           <div className="space-y-2">
             <Label htmlFor="caseFacts" className="flex items-center">
               Case Facts <span className="text-red-500 ml-1">*</span>

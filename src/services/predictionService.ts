@@ -1,57 +1,29 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { PredictionResult } from '@/utils/mockData';
-import { mockPrediction } from '@/utils/mockData'; // Import the mock prediction function
+import { mockPrediction } from '@/utils/mockData'; 
 import { isSupabaseConfigured, getMockOrRealSupabase } from '@/lib/supabase';
+import { generatePredictionWithAI } from './openRouterService';
 
-// Get a prediction from the backend
+// Get a prediction from OpenRouter AI or fallback to mock data
 export const getPrediction = async (
   caseType: string,
   witnessCount: number,
-  evidenceStrength: string
+  evidenceStrength: string,
+  caseFacts: string = ""
 ): Promise<PredictionResult | null> => {
   try {
-    // Check if Supabase is configured
-    if (!isSupabaseConfigured()) {
-      console.warn('Supabase not configured, using mock prediction data.');
-      // Return mock prediction when Supabase is not available
-      return mockPrediction(caseType, witnessCount, evidenceStrength);
-    }
-
-    const supabase = getMockOrRealSupabase();
+    // Use OpenRouter AI for prediction
+    const result = await generatePredictionWithAI(
+      caseType, 
+      witnessCount, 
+      evidenceStrength, 
+      caseFacts
+    );
     
-    // In a production app with Supabase configured, call the RPC function
-    const { data, error } = await supabase.rpc('predict_outcome', {
-      case_type: caseType,
-      witness_count: witnessCount,
-      evidence_strength: evidenceStrength
-    });
-
-    if (error) {
-      throw error;
-    }
-
-    // Type the response data more explicitly to handle JSON properties
-    const typedData = data as {
-      outcome: string;
-      confidence: number;
-      explanation: string;
-      factors: { factor: string; importance: number; reference?: string }[];
-    };
-
-    // Format the result to match our PredictionResult type
-    return {
-      outcome: typedData.outcome,
-      confidence: typedData.confidence,
-      explanation: typedData.explanation,
-      factors: typedData.factors.map(factor => ({
-        factor: factor.factor,
-        importance: factor.importance,
-        reference: factor.reference || `Based on analysis of similar cases with matching ${factor.factor.toLowerCase()} characteristics.`
-      }))
-    };
+    return result;
   } catch (error) {
-    console.error('Error getting prediction:', error);
+    console.error('Error getting prediction from OpenRouter:', error);
+    console.warn('Falling back to mock prediction data.');
     // Fall back to mock prediction on error
     return mockPrediction(caseType, witnessCount, evidenceStrength);
   }
