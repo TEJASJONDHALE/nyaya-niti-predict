@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, CheckCircle, Scale, FileText, Database } from "lucide-react";
+import { AlertTriangle, CheckCircle, FileText, Database } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface SimilarCasesDisplayProps {
@@ -14,15 +14,17 @@ interface SimilarCase {
   court: string;
   date: string;
   outcome: string;
+  crimeType: string;
   relevance: number;
   keyFacts: string[];
 }
 
 const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) => {
-  // Generate mock similar cases based on the predicted outcome
+  // Generate mock similar criminal cases based on the predicted outcome
   const generateSimilarCases = (outcome: string): SimilarCase[] => {
     const courts = ["Delhi High Court", "Mumbai High Court", "Chennai High Court", "Supreme Court"];
     const years = [2018, 2019, 2020, 2021, 2022, 2023];
+    const crimeTypes = ["Theft", "Assault", "Fraud", "Homicide", "Drug Possession"];
     
     const keyFactsByOutcome: Record<string, string[]> = {
       'Conviction': [
@@ -44,26 +46,6 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
         "Chain of custody issues",
         "Expert testimony contested successfully",
         "Reasonable doubt established"
-      ],
-      'Settlement': [
-        "Mutual agreement between parties",
-        "Compensation provided",
-        "Partial admission of liability",
-        "Mediator involvement",
-        "Family relationship considerations",
-        "Business relationship preservation",
-        "Economic efficiency considerations",
-        "Uncertain litigation outcome"
-      ],
-      'Dismissed': [
-        "Lack of jurisdiction",
-        "Statute of limitations expired",
-        "Insufficient prima facie case",
-        "Procedural non-compliance",
-        "Key witness unavailable",
-        "Essential evidence declared inadmissible",
-        "Complainant withdrew charges",
-        "Prosecutorial misconduct"
       ]
     };
     
@@ -75,15 +57,17 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
       const caseNum = Math.floor(10000 + Math.random() * 90000);
       const year = years[Math.floor(Math.random() * years.length)];
       const court = courts[Math.floor(Math.random() * courts.length)];
+      const crimeType = crimeTypes[Math.floor(Math.random() * crimeTypes.length)];
       const factCount = Math.floor(Math.random() * 3) + 2;
       const selectedFacts = [...specificFacts].sort(() => 0.5 - Math.random()).slice(0, factCount);
       
       return {
-        id: `CASE-${year}-${caseNum}`,
+        id: `CR-${year}-${caseNum}`,
         title: `State vs. ${['Smith', 'Kumar', 'Singh', 'Patel', 'Khan', 'Iyer', 'Sharma', 'Gupta'][Math.floor(Math.random() * 8)]}`,
         court,
         date: `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}/${year}`,
         outcome,
+        crimeType,
         relevance: Math.floor(70 + Math.random() * 30),
         keyFacts: selectedFacts
       };
@@ -96,7 +80,6 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
     switch (outcome) {
       case 'Conviction': return <AlertTriangle className="h-5 w-5 text-red-500" />;
       case 'Acquittal': return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'Settlement': return <Scale className="h-5 w-5 text-blue-500" />;
       default: return <FileText className="h-5 w-5 text-gray-500" />;
     }
   };
@@ -105,7 +88,6 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
     switch (outcome) {
       case 'Conviction': return 'text-red-600';
       case 'Acquittal': return 'text-green-600';
-      case 'Settlement': return 'text-blue-600';
       default: return 'text-gray-600';
     }
   };
@@ -121,10 +103,10 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
       <CardHeader className="pb-3">
         <div className="flex items-center">
           <Database className="h-5 w-5 mr-2 text-legal-primary" />
-          <CardTitle className="text-lg">Similar Case Precedents</CardTitle>
+          <CardTitle className="text-lg">Similar Criminal Case Precedents</CardTitle>
         </div>
         <p className="text-sm text-gray-500 mt-1">
-          Based on analysis of 10,000+ cases from eCourts with similar characteristics
+          Based on analysis of 10,000+ criminal cases from eCourts with similar characteristics
         </p>
       </CardHeader>
       <CardContent>
@@ -135,6 +117,7 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
                 <div>
                   <h3 className="font-medium">{scase.title}</h3>
                   <p className="text-sm text-gray-600">{scase.id} • {scase.court}</p>
+                  <p className="text-xs text-gray-500 mt-1">Crime: {scase.crimeType}</p>
                 </div>
                 <Badge className={getBadgeColor(scase.relevance)}>
                   {scase.relevance}% Match

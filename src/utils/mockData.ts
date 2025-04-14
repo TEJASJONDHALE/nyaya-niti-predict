@@ -1,10 +1,10 @@
 
 export const caseTypes = [
   'Criminal - Theft',
-  'Civil - Property Dispute',
-  'Family - Divorce',
-  'Contract - Breach',
-  'Employment - Wrongful Termination',
+  'Criminal - Assault',
+  'Criminal - Fraud',
+  'Criminal - Homicide',
+  'Criminal - Drug Possession',
 ];
 
 export const courts = [
@@ -12,7 +12,7 @@ export const courts = [
   'High Court',
   'District Court',
   'Magistrate Court',
-  'Tribunal',
+  'Special Criminal Court',
 ];
 
 export type PredictionFactor = {
@@ -41,52 +41,52 @@ export const sampleCases = [
   },
   {
     id: '2',
-    caseNumber: 'CV-2023-5678',
+    caseNumber: 'CR-2023-5678',
     court: 'High Court',
-    caseType: 'Civil - Property Dispute',
-    outcome: 'Settlement',
-    description: 'A property dispute case settled out of court.',
+    caseType: 'Criminal - Assault',
+    outcome: 'Acquittal',
+    description: 'An assault case with weak evidence leading to acquittal.',
     witnessCount: 2,
     duration: 180,
   },
   {
     id: '3',
-    caseNumber: 'FM-2023-9012',
-    court: 'Family Court',
-    caseType: 'Family - Divorce',
-    outcome: 'Settlement',
-    description: 'A divorce case with mutual agreement on settlement.',
-    witnessCount: 0,
-    duration: 120,
+    caseNumber: 'CR-2023-9012',
+    court: 'Magistrate Court',
+    caseType: 'Criminal - Drug Possession',
+    outcome: 'Conviction',
+    description: 'A drug possession case with strong evidence leading to conviction.',
+    witnessCount: 1,
+    duration: 60,
   },
 ];
 
 // Add the missing statisticsData export
 export const statisticsData = {
   casesByOutcome: {
-    'Conviction': 350,
-    'Settlement': 460,
-    'Acquittal': 190
+    'Conviction': 650,
+    'Settlement': 120,
+    'Acquittal': 230
   },
   averageDurationByType: {
-    'Criminal - Theft': 120,
-    'Civil - Property Dispute': 180,
-    'Family - Divorce': 90,
-    'Contract - Breach': 145,
-    'Employment - Wrongful Termination': 160
+    'Criminal - Theft': 95,
+    'Criminal - Assault': 140,
+    'Criminal - Fraud': 180,
+    'Criminal - Homicide': 230,
+    'Criminal - Drug Possession': 75
   },
   accuracyByCourtType: {
     'Supreme Court': 0.91,
     'High Court': 0.87,
     'District Court': 0.82,
     'Magistrate Court': 0.79,
-    'Tribunal': 0.85
+    'Special Criminal Court': 0.85
   },
   topFactors: [
     { factor: 'Evidence Strength', importance: 0.85 },
     { factor: 'Witness Count', importance: 0.72 },
-    { factor: 'Prior Precedents', importance: 0.65 },
-    { factor: 'Legal Representation', importance: 0.58 }
+    { factor: 'Prior Criminal Record', importance: 0.68 },
+    { factor: 'Police Testimony', importance: 0.62 }
   ]
 };
 
@@ -116,42 +116,85 @@ export const mockPrediction = (
     confidence = 0.6;
   }
   
-  // Adjust based on case type
-  if (caseType === 'Criminal - Theft') {
-    confidence += 0.1;
-  } else if (caseType === 'Civil - Property Dispute') {
-    outcome = outcome === 'Conviction' ? 'Settlement' : outcome;
+  // For criminal cases, adjust outcomes
+  if (caseType.includes('Criminal')) {
+    // Criminal cases don't typically end in settlement
+    if (outcome === 'Settlement') {
+      outcome = 'Conviction';
+      confidence = 0.6;
+    }
+    
+    // Specific adjustments based on crime type
+    if (caseType.includes('Theft')) {
+      confidence += 0.1;
+    } else if (caseType.includes('Homicide')) {
+      outcome = witnessCount > 3 ? 'Conviction' : 'Acquittal';
+      confidence += 0.15;
+    } else if (caseType.includes('Drug')) {
+      outcome = 'Conviction';
+      confidence += 0.2;
+    }
   }
   
   // Ensure confidence is between 0 and 1
   confidence = Math.min(Math.max(confidence, 0.3), 0.9);
   
   // Generate mock explanation
-  const explanation = `Based on analysis of 10,000+ similar cases, with ${witnessCount} witnesses and ${evidenceStrength.toLowerCase()} evidence provided in this ${caseType.toLowerCase()} case, our AI model predicts a ${outcome.toLowerCase()} outcome with ${Math.round(confidence * 100)}% confidence.`;
+  const explanation = `Based on analysis of 10,000+ similar criminal cases, with ${witnessCount} witnesses and ${evidenceStrength.toLowerCase()} evidence provided in this ${caseType.toLowerCase()} case, our AI model predicts a ${outcome.toLowerCase()} outcome with ${Math.round(confidence * 100)}% confidence.`;
   
-  // Generate mock factors with references
+  // Generate mock factors specific to criminal cases
   const factors: PredictionFactor[] = [
     {
       factor: 'Witness Count',
       importance: witnessCount > 3 ? 0.7 : 0.3,
-      reference: witnessCount > 3 ? 'Based on 237 similar cases, more than 3 witnesses significantly increases conviction rates by 42%.' : 'Analysis of 185 cases shows fewer witnesses correlate with 37% lower conviction rates.'
+      reference: witnessCount > 3 ? 'Based on 237 similar criminal cases, more than 3 witnesses significantly increases conviction rates by 42%.' : 'Analysis of 185 cases shows fewer witnesses correlate with 37% lower conviction rates.'
     },
     {
       factor: 'Evidence Strength',
       importance: evidenceStrength === 'Strong' ? 0.8 : evidenceStrength === 'Moderate' ? 0.5 : 0.2,
-      reference: evidenceStrength === 'Strong' ? 'In 312 analyzed cases with strong evidence, 78% resulted in conviction or favorable judgment.' : 'Based on 254 cases, weak evidence led to acquittal or dismissal in 68% of instances.'
-    },
-    {
-      factor: 'Case Type Precedents',
-      importance: 0.6,
-      reference: `Analysis of 189 ${caseType} cases reveals consistent patterns in judicial outcomes, with similar fact patterns resulting in ${outcome.toLowerCase()} in 72% of cases.`
-    },
-    {
-      factor: 'Jurisdictional Patterns',
-      importance: 0.4,
-      reference: 'Statistical analysis of 243 cases in similar jurisdictions shows consistent tendencies in how courts handle this type of evidence and apply relevant statutes.'
+      reference: evidenceStrength === 'Strong' ? 'In 312 analyzed criminal cases with strong evidence, 78% resulted in conviction.' : 'Based on 254 cases, weak evidence led to acquittal in 68% of instances.'
     }
   ];
+  
+  // Add case-specific factors
+  if (caseType.includes('Theft')) {
+    factors.push({
+      factor: 'Value of Stolen Property',
+      importance: 0.65,
+      reference: 'Analysis of 178 theft cases shows correlation between value of stolen property and sentencing severity.'
+    });
+  } else if (caseType.includes('Assault')) {
+    factors.push({
+      factor: 'Injury Severity',
+      importance: 0.75,
+      reference: 'In 204 assault cases, severity of injury was the primary factor in 82% of convictions.'
+    });
+  } else if (caseType.includes('Fraud')) {
+    factors.push({
+      factor: 'Financial Impact',
+      importance: 0.7,
+      reference: 'Analysis of 156 fraud cases shows financial impact directly correlates with conviction likelihood.'
+    });
+  } else if (caseType.includes('Homicide')) {
+    factors.push({
+      factor: 'Forensic Evidence',
+      importance: 0.85,
+      reference: 'In 98 analyzed homicide cases, forensic evidence quality determined outcome in 76% of cases.'
+    });
+  } else if (caseType.includes('Drug')) {
+    factors.push({
+      factor: 'Quantity Possessed',
+      importance: 0.8,
+      reference: 'Analysis of 267 drug possession cases shows quantity is the primary determining factor in 89% of convictions.'
+    });
+  }
+  
+  // Add general criminal justice factor
+  factors.push({
+    factor: 'Prior Criminal Record',
+    importance: 0.6,
+    reference: 'Statistical analysis of 432 cases shows prior criminal record increases conviction likelihood by 57%.'
+  });
   
   return {
     outcome,

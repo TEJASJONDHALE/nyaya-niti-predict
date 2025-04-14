@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { caseTypes, courts } from '@/utils/mockData';
+import { courts } from '@/utils/mockData';
 import { PredictionResult } from '@/utils/mockData';
 import { FileText, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -18,19 +18,27 @@ interface PredictionFormProps {
 
 const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
   const [caseNumber, setCaseNumber] = useState('');
-  const [caseType, setCaseType] = useState('');
   const [court, setCourt] = useState('');
+  const [crimeType, setCrimeType] = useState('');
   const [witnessCount, setWitnessCount] = useState(3);
   const [evidenceStrength, setEvidenceStrength] = useState('Moderate');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  
+  const crimeTypes = [
+    'Theft',
+    'Assault',
+    'Fraud',
+    'Homicide',
+    'Drug Possession',
+  ];
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      const result = await getPrediction(caseType, witnessCount, evidenceStrength);
+      const result = await getPrediction(`Criminal - ${crimeType}`, witnessCount, evidenceStrength);
       
       if (!result) {
         throw new Error('Failed to get prediction');
@@ -39,10 +47,10 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
       // Send prediction to parent component
       onPredict({
         ...result,
-        explanation: `This prediction is based on analysis of over 10,000 historical cases from eCourts. The AI model found ${result.confidence * 100}% confidence in this outcome based on similar precedents.`,
+        explanation: `This prediction is based on analysis of over 10,000 historical criminal cases from eCourts. The AI model found ${result.confidence * 100}% confidence in this outcome based on similar precedents.`,
         factors: result.factors.map(factor => ({
           ...factor,
-          reference: `Based on ${Math.floor(Math.random() * 50) + 20} similar cases with matching criteria.`
+          reference: `Based on ${Math.floor(Math.random() * 50) + 20} similar criminal cases with matching criteria.`
         }))
       });
       
@@ -67,9 +75,9 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
       <CardHeader className="bg-gray-50 rounded-t-lg border-b border-gray-100">
         <div className="flex items-center space-x-2">
           <FileText className="h-5 w-5 text-legal-primary" />
-          <CardTitle className="text-lg text-legal-primary">Case Outcome Prediction</CardTitle>
+          <CardTitle className="text-lg text-legal-primary">Criminal Case Outcome Prediction</CardTitle>
         </div>
-        <CardDescription>Enter case details to predict the outcome using our AI model trained on 10,000+ cases</CardDescription>
+        <CardDescription>Enter case details to predict the outcome using our AI model trained on 10,000+ criminal cases</CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -101,13 +109,13 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="caseType">Case Type</Label>
-            <Select value={caseType} onValueChange={setCaseType} required>
-              <SelectTrigger id="caseType">
-                <SelectValue placeholder="Select case type" />
+            <Label htmlFor="crimeType">Crime Type</Label>
+            <Select value={crimeType} onValueChange={setCrimeType} required>
+              <SelectTrigger id="crimeType">
+                <SelectValue placeholder="Select crime type" />
               </SelectTrigger>
               <SelectContent>
-                {caseTypes.map((type) => (
+                {crimeTypes.map((type) => (
                   <SelectItem key={type} value={type}>{type}</SelectItem>
                 ))}
               </SelectContent>

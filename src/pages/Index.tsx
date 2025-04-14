@@ -6,12 +6,9 @@ import Dashboard from '@/components/Dashboard';
 import PredictionForm from '@/components/PredictionForm';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import PredictionHistory from '@/components/PredictionHistory';
-import CaseScraper from '@/components/CaseScraper';
-import MLModelTraining from '@/components/MLModelTraining';
 import { PredictionResult } from '@/utils/mockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Layout, FileText, BarChart3, History, Database } from 'lucide-react';
-import { Scale } from '@/components/Icons';
+import { BarChart3, History, Scale } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 
@@ -46,14 +43,6 @@ const Index = () => {
               <Scale className="h-4 w-4" />
               <span>Predict</span>
             </TabsTrigger>
-            <TabsTrigger value="scrape" className="flex items-center gap-1">
-              <Database className="h-4 w-4" />
-              <span>Data Collection</span>
-            </TabsTrigger>
-            <TabsTrigger value="train" className="flex items-center gap-1">
-              <FileText className="h-4 w-4" />
-              <span>ML Training</span>
-            </TabsTrigger>
             <TabsTrigger value="dashboard" className="flex items-center gap-1">
               <BarChart3 className="h-4 w-4" />
               <span>Dashboard</span>
@@ -73,14 +62,6 @@ const Index = () => {
                 <ResultsDisplay result={predictionResult} />
               </div>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="scrape">
-            <CaseScraper />
-          </TabsContent>
-          
-          <TabsContent value="train">
-            <MLModelTraining />
           </TabsContent>
           
           <TabsContent value="dashboard">
