@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { PredictionResult } from '@/utils/mockData';
 import { mockPrediction } from '@/utils/mockData'; // Import the mock prediction function
@@ -145,12 +146,23 @@ export const lookupCaseByNumber = async (caseNumber: string): Promise<CaseDetail
         return getMockCaseDetails(caseNumber);
       }
       
-      // Add the case_type and court fields if they don't exist
+      // Since 'case_type' and 'court' may not exist in the database schema,
+      // we need to create them based on the case number
+      const crimeType = getCrimeTypeFromCaseNumber(caseNumber);
+      const court = getCourtFromCaseNumber(caseNumber);
+      
+      // Return the data with added case_type and court properties
       return {
-        ...data,
-        case_type: data.case_type || `Criminal - ${getCrimeTypeFromCaseNumber(caseNumber)}`,
-        court: data.court || getCourtFromCaseNumber(caseNumber)
-      } as CaseDetails;
+        case_number: data.case_number,
+        witness_count: data.witness_count,
+        evidence_strength: data.evidence_strength,
+        judge_experience: data.judge_experience || 0,
+        case_duration: data.case_duration || 0,
+        outcome: data.outcome || null,
+        // Add these properties that might not exist in the database
+        case_type: `Criminal - ${crimeType}`,
+        court: court
+      };
     }
     
     // If Supabase is not configured or there was an error, return mock data
@@ -162,16 +174,16 @@ export const lookupCaseByNumber = async (caseNumber: string): Promise<CaseDetail
 };
 
 // Helper function to determine crime type from case number
-const getCrimeTypeFromCaseNumber = (caseNumber: string): string => {
+const getCrimeTypeFromCaseNumber = (caseString: string): string => {
   const crimeTypes = ['Theft', 'Assault', 'Fraud', 'Homicide', 'Drug Possession'];
-  const caseNumSum = caseNumber.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const caseNumSum = caseString.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
   return crimeTypes[caseNumSum % crimeTypes.length];
 };
 
 // Helper function to determine court from case number
-const getCourtFromCaseNumber = (caseNumber: string): string => {
+const getCourtFromCaseNumber = (caseString: string): string => {
   const courts = ['Supreme Court', 'High Court', 'District Court', 'Sessions Court', 'Metropolitan Court'];
-  const caseNumSum = caseNumber.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const caseNumSum = caseString.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
   return courts[caseNumSum % courts.length];
 };
 
