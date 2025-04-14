@@ -118,7 +118,7 @@ export const getSimilarCases = async (
 };
 
 // Define a proper type for the case details
-type CaseDetails = {
+export type CaseDetails = {
   case_number: string;
   court: string;
   case_type: string;

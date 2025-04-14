@@ -25,6 +25,7 @@ export type PredictionResult = {
   outcome: string;
   confidence: number;
   explanation: string;
+  statisticalContext?: string;
   factors: PredictionFactor[];
 };
 
@@ -142,6 +143,9 @@ export const mockPrediction = (
   // Generate mock explanation
   const explanation = `Based on analysis of 10,000+ similar criminal cases, with ${witnessCount} witnesses and ${evidenceStrength.toLowerCase()} evidence provided in this ${caseType.toLowerCase()} case, our AI model predicts a ${outcome.toLowerCase()} outcome with ${Math.round(confidence * 100)}% confidence.`;
   
+  // Generate statistical context
+  const statisticalContext = generateStatisticalContext(caseType, witnessCount, evidenceStrength, outcome);
+  
   // Generate mock factors specific to criminal cases
   const factors: PredictionFactor[] = [
     {
@@ -200,6 +204,44 @@ export const mockPrediction = (
     outcome,
     confidence,
     explanation,
+    statisticalContext,
     factors
   };
+};
+
+// Helper function to generate statistical context
+const generateStatisticalContext = (
+  caseType: string,
+  witnessCount: number,
+  evidenceStrength: string,
+  outcome: string
+): string => {
+  let context = '';
+  
+  // Add crime type specific context
+  if (caseType.includes('Theft')) {
+    context += `Analysis of 537 theft cases reveals that ${evidenceStrength.toLowerCase()} evidence leads to ${outcome.toLowerCase()} in ${evidenceStrength === 'Strong' ? '82%' : evidenceStrength === 'Moderate' ? '64%' : '37%'} of cases. `;
+  } else if (caseType.includes('Assault')) {
+    context += `Historical data from 412 assault cases demonstrates ${witnessCount > 3 ? 'a strong correlation between multiple witnesses and conviction rates (76% conviction rate)' : 'that cases with few witnesses face challenges in court (43% conviction rate)'}. `;
+  } else if (caseType.includes('Fraud')) {
+    context += `Analysis of 389 fraud cases shows that ${evidenceStrength === 'Strong' ? 'strong documentary evidence is pivotal to successful prosecution (88% conviction rate)' : 'cases without solid documentation face significant hurdles (32% conviction rate)'}. `;
+  } else if (caseType.includes('Homicide')) {
+    context += `Data from 256 homicide proceedings indicates that ${witnessCount > 4 ? 'cases with multiple witnesses show a 79% conviction rate' : 'cases with limited witness testimony have a 51% conviction rate'} when combined with ${evidenceStrength.toLowerCase()} forensic evidence. `;
+  } else if (caseType.includes('Drug')) {
+    context += `Review of 623 drug possession cases shows ${evidenceStrength === 'Strong' ? 'a 91% conviction rate with strong evidence' : 'a significant dependence on evidence quality, with weak evidence leading to only 45% conviction rate'}. `;
+  }
+  
+  // Add witness testimony statistical context
+  if (witnessCount > 4) {
+    context += `Cases with ${witnessCount} or more witnesses have historically shown a 73% higher likelihood of conviction across all criminal types. `;
+  } else if (witnessCount > 2) {
+    context += `Cases with a moderate number of witnesses (${witnessCount}) typically show mixed outcomes depending on witness credibility and consistency. `;
+  } else {
+    context += `Cases with only ${witnessCount} witness(es) face an average 47% lower conviction rate, placing greater emphasis on physical evidence quality. `;
+  }
+  
+  // Add evidence strength context
+  context += `${evidenceStrength} evidence quality has been shown to affect case outcomes by ${evidenceStrength === 'Strong' ? '+64%' : evidenceStrength === 'Moderate' ? '+21%' : '-26%'} in a longitudinal study of 1,250 criminal proceedings over the past decade.`;
+  
+  return context;
 };
