@@ -8,9 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { courts } from '@/utils/mockData';
 import { PredictionResult } from '@/utils/mockData';
-import { FileText, ArrowRight } from 'lucide-react';
+import { FileText, ArrowRight, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getPrediction } from '@/services/predictionService';
+import { getPrediction, lookupCaseByNumber } from '@/services/predictionService';
 
 interface PredictionFormProps {
   onPredict: (result: PredictionResult, caseId?: string) => void;
@@ -23,6 +23,7 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
   const [witnessCount, setWitnessCount] = useState(3);
   const [evidenceStrength, setEvidenceStrength] = useState('Moderate');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLookingUp, setIsLookingUp] = useState(false);
   const { toast } = useToast();
   
   const crimeTypes = [
@@ -32,6 +33,55 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
     'Homicide',
     'Drug Possession',
   ];
+  
+  const handleLookupCase = async () => {
+    if (!caseNumber || caseNumber.trim() === '') {
+      toast({
+        title: 'Case Number Required',
+        description: 'Please enter a valid case number to look up.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLookingUp(true);
+    
+    try {
+      const caseDetails = await lookupCaseByNumber(caseNumber);
+      
+      if (caseDetails) {
+        // Extract case type (assuming format "Criminal - Type")
+        const extractedCrimeType = caseDetails.case_type.includes(' - ') 
+          ? caseDetails.case_type.split(' - ')[1] 
+          : caseDetails.case_type;
+          
+        setCourt(caseDetails.court);
+        setCrimeType(extractedCrimeType);
+        setWitnessCount(caseDetails.witness_count);
+        setEvidenceStrength(caseDetails.evidence_strength);
+        
+        toast({
+          title: 'Case Found',
+          description: `Retrieved details for case ${caseNumber}`,
+        });
+      } else {
+        toast({
+          title: 'Case Not Found',
+          description: 'No details found for the specified case number.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error during case lookup:', error);
+      toast({
+        title: 'Lookup Failed',
+        description: 'An error occurred while looking up the case.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLookingUp(false);
+    }
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,18 +131,34 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
       </CardHeader>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="caseNumber">Case Number</Label>
+          <div className="space-y-2">
+            <Label htmlFor="caseNumber">Case Number</Label>
+            <div className="flex gap-2">
               <Input 
                 id="caseNumber"
                 placeholder="e.g. CR-2023-1234" 
                 value={caseNumber}
                 onChange={(e) => setCaseNumber(e.target.value)}
                 required
+                className="flex-1"
               />
+              <Button 
+                type="button" 
+                variant="secondary" 
+                onClick={handleLookupCase}
+                disabled={isLookingUp}
+                className="flex-shrink-0"
+              >
+                {isLookingUp ? 'Looking Up...' : (
+                  <>
+                    <Search className="mr-2 h-4 w-4" /> Lookup
+                  </>
+                )}
+              </Button>
             </div>
-            
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="court">Court</Label>
               <Select value={court} onValueChange={setCourt} required>
@@ -106,20 +172,20 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="crimeType">Crime Type</Label>
-            <Select value={crimeType} onValueChange={setCrimeType} required>
-              <SelectTrigger id="crimeType">
-                <SelectValue placeholder="Select crime type" />
-              </SelectTrigger>
-              <SelectContent>
-                {crimeTypes.map((type) => (
-                  <SelectItem key={type} value={type}>{type}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            
+            <div className="space-y-2">
+              <Label htmlFor="crimeType">Crime Type</Label>
+              <Select value={crimeType} onValueChange={setCrimeType} required>
+                <SelectTrigger id="crimeType">
+                  <SelectValue placeholder="Select crime type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {crimeTypes.map((type) => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
           <div className="space-y-2">

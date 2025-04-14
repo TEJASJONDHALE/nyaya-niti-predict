@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { PredictionResult } from '@/utils/mockData';
 import { mockPrediction } from '@/utils/mockData'; // Import the mock prediction function
@@ -115,6 +114,55 @@ export const getSimilarCases = async (
   // For this demo, we'll return mock data
   console.log(`Finding similar cases for ${outcome} in ${caseType}`);
   return [];
+};
+
+// Look up case details by case number
+export const lookupCaseByNumber = async (caseNumber: string) => {
+  try {
+    // In a real application with Supabase configured, query the case_data table
+    if (isSupabaseConfigured()) {
+      const supabase = getMockOrRealSupabase();
+      const { data, error } = await supabase
+        .from('case_data')
+        .select('*')
+        .eq('case_number', caseNumber)
+        .single();
+      
+      if (error) {
+        console.error('Error looking up case:', error);
+        return getMockCaseDetails(caseNumber);
+      }
+      
+      return data;
+    }
+    
+    // If Supabase is not configured or there was an error, return mock data
+    return getMockCaseDetails(caseNumber);
+  } catch (error) {
+    console.error('Error looking up case:', error);
+    return getMockCaseDetails(caseNumber);
+  }
+};
+
+// Helper function to generate mock case details for development/demo
+const getMockCaseDetails = (caseNumber: string) => {
+  const courts = ['Supreme Court', 'High Court', 'District Court', 'Sessions Court', 'Metropolitan Court'];
+  const crimeTypes = ['Theft', 'Assault', 'Fraud', 'Homicide', 'Drug Possession'];
+  const evidenceStrengths = ['Strong', 'Moderate', 'Weak'];
+  
+  // Generate consistent mock data based on the case number
+  const caseNumSum = caseNumber.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  
+  return {
+    case_number: caseNumber,
+    court: courts[caseNumSum % courts.length],
+    case_type: `Criminal - ${crimeTypes[caseNumSum % crimeTypes.length]}`,
+    witness_count: (caseNumSum % 8) + 1, // 1-8 witnesses
+    evidence_strength: evidenceStrengths[caseNumSum % evidenceStrengths.length],
+    judge_experience: (caseNumSum % 15) + 5, // 5-20 years experience
+    case_duration: (caseNumSum % 24) + 1, // 1-24 months
+    outcome: null // We don't know the outcome yet as we're predicting it
+  };
 };
 
 // Get user's prediction history
