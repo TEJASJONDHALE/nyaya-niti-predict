@@ -128,10 +128,12 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, caseId }) => {
               </div>
               
               <div>
-                <h4 className="font-medium text-gray-700 mb-2">Prediction Analysis</h4>
-                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded border border-gray-100">
-                  {result.explanation}
-                </p>
+                <h4 className="font-medium text-gray-700 mb-2">Case Analysis</h4>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <p className="text-sm text-gray-700 mb-3">
+                    {result.explanation}
+                  </p>
+                </div>
                 
                 <div className="mt-3">
                   <h4 className="text-sm font-medium text-gray-700 mb-2">Statistical Context</h4>

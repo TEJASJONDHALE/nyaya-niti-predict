@@ -36,6 +36,17 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate that case facts are provided
+    if (!caseFacts.trim()) {
+      toast({
+        title: 'Case Facts Required',
+        description: 'Please provide details about the case to generate a prediction.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
@@ -48,7 +59,7 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
       // Enhance the prediction with more context based on case facts
       const enhancedResult = {
         ...result,
-        explanation: `Based on the provided case facts regarding this ${crimeType.toLowerCase()} case in the ${court}, our AI model predicts a ${result.outcome.toLowerCase()} outcome with ${result.confidence * 100}% confidence. The combination of ${witnessCount} witnesses and ${evidenceStrength.toLowerCase()} evidence is a significant factor in this prediction. ${result.explanation}`,
+        explanation: `Based on the provided case facts: "${caseFacts}", our AI model predicts a ${result.outcome.toLowerCase()} outcome with ${result.confidence * 100}% confidence. The combination of ${witnessCount} witnesses and ${evidenceStrength.toLowerCase()} evidence in this ${crimeType.toLowerCase()} case is a significant factor in this prediction. ${result.explanation}`,
         statisticalContext: generateStatisticalContext(crimeType, court, witnessCount, evidenceStrength),
         factors: result.factors.map(factor => ({
           ...factor,
@@ -131,9 +142,29 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
       </CardHeader>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Move Case Facts to the top and mark as required */}
+          <div className="space-y-2">
+            <Label htmlFor="caseFacts" className="flex items-center">
+              Case Facts <span className="text-red-500 ml-1">*</span>
+            </Label>
+            <Textarea
+              id="caseFacts"
+              placeholder="Enter all relevant details about the case..."
+              value={caseFacts}
+              onChange={(e) => setCaseFacts(e.target.value)}
+              className="min-h-[120px] resize-none"
+              required
+            />
+            <p className="text-xs text-gray-500">
+              Provide specific details about the crime, circumstances, and evidence for a more accurate prediction
+            </p>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="court">Court</Label>
+              <Label htmlFor="court" className="flex items-center">
+                Court <span className="text-red-500 ml-1">*</span>
+              </Label>
               <Select value={court} onValueChange={setCourt} required>
                 <SelectTrigger id="court">
                   <SelectValue placeholder="Select court" />
@@ -147,7 +178,9 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="crimeType">Crime Type</Label>
+              <Label htmlFor="crimeType" className="flex items-center">
+                Crime Type <span className="text-red-500 ml-1">*</span>
+              </Label>
               <Select value={crimeType} onValueChange={setCrimeType} required>
                 <SelectTrigger id="crimeType">
                   <SelectValue placeholder="Select crime type" />
@@ -188,17 +221,6 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
                 <SelectItem value="Weak">Weak</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="caseFacts">Case Facts (optional)</Label>
-            <Textarea
-              id="caseFacts"
-              placeholder="Enter relevant details about the case..."
-              value={caseFacts}
-              onChange={(e) => setCaseFacts(e.target.value)}
-              className="min-h-[100px] resize-none"
-            />
           </div>
           
           <Button 
