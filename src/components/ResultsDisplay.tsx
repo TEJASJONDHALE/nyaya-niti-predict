@@ -137,7 +137,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, caseId }) => {
                 <div className="mt-3">
                   <h4 className="text-sm font-medium text-gray-700 mb-2">Statistical Context</h4>
                   <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded border border-blue-100">
-                    {result.statisticalContext || "Analysis of similar cases shows that this combination of factors frequently leads to the predicted outcome. Historical data from the past 3 years demonstrates a consistent pattern in cases with matching evidence profiles."}
+                    AI-based analysis of legal precedents and case characteristics to derive insights and predict potential outcomes.
                   </p>
                 </div>
                 
