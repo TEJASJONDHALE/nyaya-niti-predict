@@ -5,7 +5,7 @@ import { PredictionResult } from '@/utils/mockData';
 const API_KEY = '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';
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-// Function to generate a prediction using OpenRouter's Llama Mavrik 3.1
+// Function to generate a prediction using OpenRouter's Claude 3.5 Sonnet
 export const generatePredictionWithAI = async (
   caseType: string,
   witnessCount: number,
@@ -15,8 +15,8 @@ export const generatePredictionWithAI = async (
   try {
     // Create a prompt for the AI model
     const prompt = `
-You are LegalPredictor AI, an expert system trained on thousands of legal cases. 
-You need to predict the outcome of a legal case based on the following information:
+You are LegalPredictor AI, an expert system for legal case prediction.
+Analyze this case and provide a prediction based on the following information:
 
 Case Type: ${caseType}
 Number of Witnesses: ${witnessCount}
@@ -28,7 +28,7 @@ Analyze this information and provide a JSON response with the following structur
   "outcome": "Conviction", // can be Conviction, Acquittal, or Settlement
   "confidence": 0.85, // value between 0 and 1
   "explanation": "Detailed explanation of the prediction...",
-  "statisticalContext": "Statistical analysis comparing this case to historical data...",
+  "statisticalContext": "Statistical analysis of similar cases...",
   "factors": [
     {
       "factor": "Name of factor influencing the prediction",
@@ -46,11 +46,11 @@ Analyze this information and provide a JSON response with the following structur
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${API_KEY}`,
-        'HTTP-Referer': window.location.origin, // Required by OpenRouter
-        'X-Title': 'Legal Case Predictor' // Optional - title of your app
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'Legal Case Predictor'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3-5-sonnet:beta', // Using Llama Mavrik 3.1 model
+        model: 'anthropic/claude-3-sonnet', // Using Claude 3.5 Sonnet model
         messages: [
           { role: 'user', content: prompt }
         ],
@@ -87,35 +87,12 @@ Analyze this information and provide a JSON response with the following structur
         {
           factor: "Evidence Strength",
           importance: 0.7,
-          reference: "Based on analysis of similar cases with matching evidence profiles."
+          reference: "Based on analysis of similar cases"
         }
       ]
     };
   } catch (error) {
     console.error('Error generating prediction with AI:', error);
-    // Fallback to mock prediction
-    return {
-      outcome: evidenceStrength === 'Strong' ? 'Conviction' : 'Acquittal',
-      confidence: evidenceStrength === 'Strong' ? 0.85 : 0.65,
-      explanation: `Prediction based on case facts and available evidence. ${caseType} cases with ${witnessCount} witnesses and ${evidenceStrength.toLowerCase()} evidence typically result in this outcome.`,
-      statisticalContext: `Due to an error connecting to our AI service, this is a fallback prediction based on basic case parameters.`,
-      factors: [
-        {
-          factor: "Evidence Strength",
-          importance: 0.8,
-          reference: `${evidenceStrength} evidence is a primary factor in determining case outcomes.`
-        },
-        {
-          factor: "Witness Count",
-          importance: 0.6,
-          reference: `${witnessCount} witnesses can significantly impact jury decisions.`
-        },
-        {
-          factor: "Case Type",
-          importance: 0.7,
-          reference: `${caseType} cases have specific patterns of outcomes based on historical data.`
-        }
-      ]
-    };
+    throw error;
   }
 };

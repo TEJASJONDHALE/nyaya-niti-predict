@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { courts } from '@/utils/mockData';
 import { PredictionResult } from '@/utils/mockData';
@@ -36,7 +36,6 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate that case facts are provided
     if (!caseFacts.trim()) {
       toast({
         title: 'Case Facts Required',
@@ -49,7 +48,6 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
     setIsSubmitting(true);
     
     try {
-      // Pass case facts to the prediction service
       const result = await getPrediction(
         `Criminal - ${crimeType}`, 
         witnessCount, 
@@ -61,7 +59,6 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
         throw new Error('Failed to get prediction');
       }
       
-      // Send prediction to parent component
       onPredict(result);
       
       toast({
@@ -72,7 +69,7 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
       console.error('Error during prediction:', error);
       toast({
         title: 'AI Prediction Failed',
-        description: 'An error occurred while generating the prediction with OpenRouter AI.',
+        description: 'An error occurred while generating the prediction. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -80,59 +77,14 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
     }
   };
 
-  // Generate statistical context paragraph based on input factors
-  const generateStatisticalContext = (
-    crimeType: string, 
-    court: string, 
-    witnessCount: number, 
-    evidenceStrength: string
-  ) => {
-    let statistics = '';
-    
-    // Add crime type specific statistics
-    switch(crimeType) {
-      case 'Theft':
-        statistics += `Analysis of 537 similar theft cases reveals that ${evidenceStrength.toLowerCase()} evidence leads to conviction in ${evidenceStrength === 'Strong' ? '82%' : evidenceStrength === 'Moderate' ? '64%' : '37%'} of cases. `;
-        break;
-      case 'Assault':
-        statistics += `Historical data from 412 assault cases indicates ${witnessCount > 3 ? 'a strong correlation between multiple witnesses and conviction rates (76% conviction rate)' : 'that cases with few witnesses face challenges in court (43% conviction rate)'}. `;
-        break;
-      case 'Fraud':
-        statistics += `Analysis of 389 fraud cases shows that ${evidenceStrength === 'Strong' ? 'strong documentary evidence is pivotal to successful prosecution (88% conviction rate)' : 'cases without solid documentation face significant hurdles (32% conviction rate)'}. `;
-        break;
-      case 'Homicide':
-        statistics += `Data from 256 homicide proceedings indicates that ${witnessCount > 4 ? 'cases with multiple witnesses show a 79% conviction rate' : 'cases with limited witness testimony have a 51% conviction rate'} when combined with ${evidenceStrength.toLowerCase()} forensic evidence. `;
-        break;
-      case 'Drug Possession':
-        statistics += `Review of 623 drug possession cases shows ${evidenceStrength === 'Strong' ? 'a 91% conviction rate with strong evidence' : 'a significant dependence on evidence quality, with weak evidence leading to only 45% conviction rate'}. `;
-        break;
-      default:
-        statistics += `Analysis of similar criminal cases shows a ${evidenceStrength === 'Strong' ? 'high' : evidenceStrength === 'Moderate' ? 'moderate' : 'low'} correlation between evidence strength and outcome. `;
-    }
-    
-    // Add court specific statistics
-    statistics += `In the ${court}, historical data reveals ${Math.floor(Math.random() * 30) + 70}% of cases with similar profiles reaching the same outcome. `;
-    
-    // Add general statistics about witness testimony
-    if (witnessCount > 4) {
-      statistics += `Cases with ${witnessCount} or more witnesses have historically shown a 73% higher likelihood of conviction across all criminal types.`;
-    } else if (witnessCount > 2) {
-      statistics += `Cases with a moderate number of witnesses (${witnessCount}) typically show mixed outcomes depending on witness credibility and consistency.`;
-    } else {
-      statistics += `Cases with only ${witnessCount} witness(es) face an average 47% lower conviction rate, placing greater emphasis on physical evidence quality.`;
-    }
-    
-    return statistics;
-  };
-
   return (
     <Card className="legal-card">
       <CardHeader className="bg-gray-50 rounded-t-lg border-b border-gray-100">
         <div className="flex items-center space-x-2">
           <FileText className="h-5 w-5 text-legal-primary" />
-          <CardTitle className="text-lg text-legal-primary">Criminal Case Outcome Prediction</CardTitle>
+          <CardTitle className="text-lg text-legal-primary">AI Legal Case Predictor</CardTitle>
         </div>
-        <CardDescription>Enter case facts to predict the outcome using our AI model trained on 10,000+ criminal cases</CardDescription>
+        <CardDescription>Enter case details to get an AI-powered prediction of the likely outcome</CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -149,7 +101,7 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
               required
             />
             <p className="text-xs text-gray-500">
-              Provide specific details about the crime, circumstances, and evidence for a more accurate prediction
+              Provide specific details about the crime, circumstances, and evidence for more accurate AI analysis
             </p>
           </div>
           
@@ -188,17 +140,18 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
           </div>
           
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="witnessCount">Number of Witnesses: {witnessCount}</Label>
-            </div>
-            <Slider
+            <Label htmlFor="witnessCount" className="flex items-center">
+              Number of Witnesses <span className="text-red-500 ml-1">*</span>
+            </Label>
+            <Input
               id="witnessCount"
+              type="number"
               min={0}
-              max={10}
-              step={1}
-              value={[witnessCount]}
-              onValueChange={(value) => setWitnessCount(value[0])}
-              className="py-4"
+              max={50}
+              value={witnessCount}
+              onChange={(e) => setWitnessCount(Number(e.target.value))}
+              className="w-full"
+              required
             />
           </div>
           
@@ -225,7 +178,7 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
               'Analyzing Case...'
             ) : (
               <>
-                Generate Prediction <ArrowRight className="ml-2 h-4 w-4" />
+                Generate AI Prediction <ArrowRight className="ml-2 h-4 w-4" />
               </>
             )}
           </Button>
