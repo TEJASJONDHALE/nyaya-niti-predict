@@ -145,7 +145,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, caseId }) => {
                 <div className="mt-3 bg-gray-50 p-3 rounded border border-gray-100 flex items-start">
                   <Database className="h-4 w-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
                   <p className="text-xs text-blue-700">
-                    This prediction is based on analysis of 10,000+ cases scraped from eCourts and processed through our machine learning model.
+                    This prediction is generated using advanced AI analysis of legal cases and jurisprudence.
                   </p>
                 </div>
               </div>

@@ -106,7 +106,7 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
           <CardTitle className="text-lg">Similar Criminal Case Precedents</CardTitle>
         </div>
         <p className="text-sm text-gray-500 mt-1">
-          Based on analysis of 10,000+ criminal cases from eCourts with similar characteristics
+          Based on AI analysis of legal case precedents and jurisprudence
         </p>
       </CardHeader>
       <CardContent>

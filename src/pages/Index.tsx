@@ -2,13 +2,12 @@
 import React, { useState } from 'react';
 import { Logo } from '@/components/Logo';
 import Header from '@/components/Header';
-import Dashboard from '@/components/Dashboard';
 import PredictionForm from '@/components/PredictionForm';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import PredictionHistory from '@/components/PredictionHistory';
 import { PredictionResult } from '@/utils/mockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, History, Scale } from 'lucide-react';
+import { Scale, History } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 
@@ -43,10 +42,6 @@ const Index = () => {
               <Scale className="h-4 w-4" />
               <span>Predict</span>
             </TabsTrigger>
-            <TabsTrigger value="dashboard" className="flex items-center gap-1">
-              <BarChart3 className="h-4 w-4" />
-              <span>Dashboard</span>
-            </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-1">
               <History className="h-4 w-4" />
               <span>History</span>
@@ -62,10 +57,6 @@ const Index = () => {
                 <ResultsDisplay result={predictionResult} />
               </div>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="dashboard">
-            <Dashboard />
           </TabsContent>
           
           <TabsContent value="history">
