@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -145,7 +144,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, caseId }) => {
                 <div className="mt-3 bg-gray-50 p-3 rounded border border-gray-100 flex items-start">
                   <Database className="h-4 w-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
                   <p className="text-xs text-blue-700">
-                    This prediction is generated using advanced AI analysis of legal cases and jurisprudence.
+                    Predictions are generated using advanced AI analysis of real cases from the eCourts service.
                   </p>
                 </div>
               </div>

@@ -1,4 +1,3 @@
-
 import { PredictionResult } from '@/utils/mockData';
 
 // OpenRouter API configuration
@@ -93,6 +92,67 @@ Analyze this information and provide a JSON response with the following structur
     };
   } catch (error) {
     console.error('Error generating prediction with AI:', error);
+    throw error;
+  }
+};
+
+// Function to fetch similar cases using AI
+export const fetchSimilarCasesWithAI = async (outcome: string): Promise<any[]> => {
+  try {
+    const prompt = `
+You are an AI assistant that analyzes legal cases. Please generate 5 relevant similar legal cases from Indian eCourts for a case with outcome: ${outcome}
+
+Return a JSON array of cases with this structure:
+[{
+  "id": "case-number",
+  "title": "case-title",
+  "court": "court-name",
+  "date": "date",
+  "outcome": "${outcome}",
+  "crimeType": "crime-type",
+  "relevance": number (70-100),
+  "keyFacts": ["fact1", "fact2", "fact3"]
+}]
+
+Focus on real-world criminal cases from Indian courts, with realistic case numbers, courts, and facts.`;
+
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`,
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'Legal Case Predictor'
+      },
+      body: JSON.stringify({
+        model: 'anthropic/claude-3-sonnet',
+        messages: [
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 1500,
+        response_format: { type: "json_object" }
+      })
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error('OpenRouter API error:', data);
+      throw new Error(data.error?.message || 'Failed to get similar cases from AI');
+    }
+
+    let aiResponse;
+    try {
+      const content = data.choices[0].message.content;
+      aiResponse = JSON.parse(content);
+      return aiResponse;
+    } catch (error) {
+      console.error('Failed to parse AI response:', error);
+      throw new Error('Invalid response format from AI');
+    }
+  } catch (error) {
+    console.error('Error fetching similar cases with AI:', error);
     throw error;
   }
 };
