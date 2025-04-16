@@ -53,8 +53,8 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
           setSimilarCases(response);
           setDataSource('AI');
         } else if (response && typeof response === 'object') {
-          if (response && 'cases' in response && Array.isArray(response.cases)) {
-            setSimilarCases(response.cases);
+          if ('cases' in response && Array.isArray((response as CasesResponse).cases)) {
+            setSimilarCases((response as CasesResponse).cases);
             setDataSource('AI');
           } else {
             const possibleArrays = Object.values(response).filter(Array.isArray);
