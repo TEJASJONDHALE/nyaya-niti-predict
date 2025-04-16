@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, CheckCircle, FileText, Database, Loader } from "lucide-react";
@@ -21,6 +20,8 @@ interface SimilarCase {
   keyFacts: string[];
 }
 
+type AIResponse = SimilarCase[] | { cases: SimilarCase[] } | Record<string, any>;
+
 const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) => {
   const [similarCases, setSimilarCases] = useState<SimilarCase[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,28 +41,31 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
         setError(null);
         console.log(`Fetching similar cases for outcome: ${outcome}`);
         
-        const cases = await fetchSimilarCasesWithAI(outcome);
-        console.log("Fetched similar cases:", cases);
+        const response = await fetchSimilarCasesWithAI(outcome);
+        console.log("Fetched similar cases:", response);
         
         // Handle different response formats
-        if (Array.isArray(cases)) {
-          setSimilarCases(cases);
+        if (Array.isArray(response)) {
+          setSimilarCases(response);
           setDataSource('AI');
-        } else if (cases && Array.isArray(cases.cases)) {
-          setSimilarCases(cases.cases);
-          setDataSource('AI');
-        } else if (cases && typeof cases === 'object') {
-          // For any other object structure, try to extract cases array
-          const possibleArrays = Object.values(cases).filter(Array.isArray);
-          if (possibleArrays.length > 0 && possibleArrays[0].length > 0) {
-            setSimilarCases(possibleArrays[0]);
+        } else if (response && typeof response === 'object') {
+          // Check if response has a 'cases' property that is an array
+          if (Array.isArray(response.cases)) {
+            setSimilarCases(response.cases);
             setDataSource('AI');
           } else {
-            console.warn('Could not extract cases array from response, using mock data');
-            setDataSource('Mock');
+            // For any other object structure, try to extract cases array
+            const possibleArrays = Object.values(response).filter(Array.isArray);
+            if (possibleArrays.length > 0 && possibleArrays[0].length > 0) {
+              setSimilarCases(possibleArrays[0]);
+              setDataSource('AI');
+            } else {
+              console.warn('Could not extract cases array from response, using mock data');
+              setDataSource('Mock');
+            }
           }
         } else {
-          console.warn('Unexpected format for similar cases response', cases);
+          console.warn('Unexpected format for similar cases response', response);
           setDataSource('Mock');
         }
 
