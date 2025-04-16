@@ -20,7 +20,12 @@ interface SimilarCase {
   keyFacts: string[];
 }
 
-type AIResponse = SimilarCase[] | { cases: SimilarCase[] } | Record<string, any>;
+interface CasesResponse {
+  cases: SimilarCase[];
+  [key: string]: any;
+}
+
+type AIResponse = SimilarCase[] | CasesResponse | Record<string, unknown>;
 
 const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) => {
   const [similarCases, setSimilarCases] = useState<SimilarCase[]>([]);
@@ -44,17 +49,14 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
         const response = await fetchSimilarCasesWithAI(outcome);
         console.log("Fetched similar cases:", response);
         
-        // Handle different response formats
         if (Array.isArray(response)) {
           setSimilarCases(response);
           setDataSource('AI');
         } else if (response && typeof response === 'object') {
-          // Check if response has a 'cases' property that is an array
-          if (Array.isArray(response.cases)) {
+          if (response && 'cases' in response && Array.isArray(response.cases)) {
             setSimilarCases(response.cases);
             setDataSource('AI');
           } else {
-            // For any other object structure, try to extract cases array
             const possibleArrays = Object.values(response).filter(Array.isArray);
             if (possibleArrays.length > 0 && possibleArrays[0].length > 0) {
               setSimilarCases(possibleArrays[0]);
