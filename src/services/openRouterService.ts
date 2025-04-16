@@ -5,8 +5,8 @@ const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // Function to get the API key - uses window.env for client-side access
 const getApiKey = () => {
-  // Try to get from environment or fall back to localStorage if not available
-  return process.env.OPENROUTER_API_KEY || localStorage.getItem('OPENROUTER_API_KEY');
+  // For now, using the provided API key
+  return "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";
 };
 
 // Function to fetch similar cases using AI
@@ -50,7 +50,7 @@ Important guidelines:
         'X-Title': 'Legal Case Predictor'
       },
       body: JSON.stringify({
-        model: 'google/gemini-pro',
+        model: 'meta-llama/llama-4-maverick:free',
         messages: [
           { role: 'user', content: prompt }
         ],
@@ -69,8 +69,8 @@ Important guidelines:
 
     try {
       const content = data.choices[0].message.content;
-      aiResponse = JSON.parse(content);
-      return aiResponse;
+      const parsedResponse = JSON.parse(content);
+      return parsedResponse;
     } catch (error) {
       console.error('Failed to parse AI response:', error);
       throw new Error('Invalid response format from AI');
@@ -127,7 +127,7 @@ Ensure high accuracy and detailed analysis based on legal precedents.`;
         'X-Title': 'Legal Case Predictor'
       },
       body: JSON.stringify({
-        model: 'google/gemini-pro',
+        model: 'meta-llama/llama-4-maverick:free',
         messages: [
           { role: 'user', content: prompt }
         ],
