@@ -1,3 +1,4 @@
+
 import { PredictionResult } from '@/utils/mockData';
 
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -49,7 +50,7 @@ Important guidelines:
         'X-Title': 'Legal Case Predictor'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3-5-sonnet',
+        model: 'google/gemini-pro',
         messages: [
           { role: 'user', content: prompt }
         ],
@@ -66,7 +67,6 @@ Important guidelines:
       throw new Error(data.error?.message || 'Failed to get similar cases from AI');
     }
 
-    let aiResponse;
     try {
       const content = data.choices[0].message.content;
       aiResponse = JSON.parse(content);
@@ -127,7 +127,7 @@ Ensure high accuracy and detailed analysis based on legal precedents.`;
         'X-Title': 'Legal Case Predictor'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3-5-sonnet',
+        model: 'google/gemini-pro',
         messages: [
           { role: 'user', content: prompt }
         ],
