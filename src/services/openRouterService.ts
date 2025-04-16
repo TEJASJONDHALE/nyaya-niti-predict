@@ -56,7 +56,11 @@ Important guidelines:
         ],
         temperature: 0.3,
         max_tokens: 1500,
-        response_format: { type: "json_object" }
+        response_format: { type: "json_object" },
+        // Allow prompt training and data usage
+        transforms: ["promptimagescale"],
+        route: "fallback",
+        allow_data_use: true
       })
     });
 
@@ -133,7 +137,11 @@ Ensure high accuracy and detailed analysis based on legal precedents.`;
         ],
         temperature: 0.3,
         max_tokens: 1500,
-        response_format: { type: "json_object" }
+        response_format: { type: "json_object" },
+        // Allow prompt training and data usage
+        transforms: ["promptimagescale"],
+        route: "fallback",
+        allow_data_use: true
       })
     });
 

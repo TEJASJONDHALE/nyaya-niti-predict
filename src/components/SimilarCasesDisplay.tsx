@@ -1,8 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, CheckCircle, FileText, Database } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { fetchSimilarCasesWithAI } from '@/services/openRouterService';
+import { useToast } from "@/hooks/use-toast";
 
 interface SimilarCasesDisplayProps {
   outcome: string;
@@ -23,23 +25,46 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
   const [similarCases, setSimilarCases] = useState<SimilarCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchCases = async () => {
       try {
         setLoading(true);
         const cases = await fetchSimilarCasesWithAI(outcome);
-        setSimilarCases(cases);
+        console.log("Fetched similar cases:", cases);
+        
+        // Handle both array format and object with array format
+        if (Array.isArray(cases)) {
+          setSimilarCases(cases);
+        } else if (cases && Array.isArray(cases[0])) {
+          setSimilarCases(cases[0]);
+        } else {
+          setSimilarCases([]);
+          console.warn('Unexpected format for similar cases response', cases);
+          toast({
+            title: "Warning",
+            description: "Received unexpected format for similar cases",
+            variant: "destructive"
+          });
+        }
       } catch (err) {
         console.error('Error fetching similar cases:', err);
         setError('Failed to fetch similar cases');
+        toast({
+          title: "Error",
+          description: "Failed to fetch similar cases. Using mock data instead.",
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCases();
-  }, [outcome]);
+    if (outcome) {
+      fetchCases();
+    }
+  }, [outcome, toast]);
   
   const getOutcomeIcon = (outcome: string) => {
     switch (outcome) {
@@ -80,6 +105,16 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
       <Card className="mt-4">
         <CardContent className="p-6">
           <div className="text-red-500 text-center">{error}</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (similarCases.length === 0) {
+    return (
+      <Card className="mt-4">
+        <CardContent className="p-6">
+          <div className="text-gray-500 text-center">No similar cases found</div>
         </CardContent>
       </Card>
     );
