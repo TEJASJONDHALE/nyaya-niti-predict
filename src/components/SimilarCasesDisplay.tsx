@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, CheckCircle, FileText, Database } from "lucide-react";
+import { AlertTriangle, CheckCircle, FileText, Database, Loader } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { fetchSimilarCasesWithAI } from '@/services/openRouterService';
 import { useToast } from "@/hooks/use-toast";
@@ -25,32 +25,57 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
   const [similarCases, setSimilarCases] = useState<SimilarCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dataSource, setDataSource] = useState<'AI' | 'Mock'>('AI');
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchCases = async () => {
+      if (!outcome) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
+        setError(null);
+        console.log(`Fetching similar cases for outcome: ${outcome}`);
+        
         const cases = await fetchSimilarCasesWithAI(outcome);
         console.log("Fetched similar cases:", cases);
         
-        // Handle both array format and object with array format
+        // Handle different response formats
         if (Array.isArray(cases)) {
           setSimilarCases(cases);
-        } else if (cases && Array.isArray(cases[0])) {
-          setSimilarCases(cases[0]);
+          setDataSource('AI');
+        } else if (cases && Array.isArray(cases.cases)) {
+          setSimilarCases(cases.cases);
+          setDataSource('AI');
+        } else if (cases && typeof cases === 'object') {
+          // For any other object structure, try to extract cases array
+          const possibleArrays = Object.values(cases).filter(Array.isArray);
+          if (possibleArrays.length > 0 && possibleArrays[0].length > 0) {
+            setSimilarCases(possibleArrays[0]);
+            setDataSource('AI');
+          } else {
+            console.warn('Could not extract cases array from response, using mock data');
+            setDataSource('Mock');
+          }
         } else {
-          setSimilarCases([]);
           console.warn('Unexpected format for similar cases response', cases);
+          setDataSource('Mock');
+        }
+
+        if (dataSource === 'Mock') {
           toast({
-            title: "Warning",
-            description: "Received unexpected format for similar cases",
-            variant: "destructive"
+            title: "Using Mock Data",
+            description: "Could not retrieve AI-generated similar cases. Using mock data instead.",
+            variant: "default"
           });
         }
       } catch (err) {
         console.error('Error fetching similar cases:', err);
         setError('Failed to fetch similar cases');
+        setDataSource('Mock');
         toast({
           title: "Error",
           description: "Failed to fetch similar cases. Using mock data instead.",
@@ -61,23 +86,21 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
       }
     };
 
-    if (outcome) {
-      fetchCases();
-    }
+    fetchCases();
   }, [outcome, toast]);
   
   const getOutcomeIcon = (outcome: string) => {
-    switch (outcome) {
-      case 'Conviction': return <AlertTriangle className="h-5 w-5 text-red-500" />;
-      case 'Acquittal': return <CheckCircle className="h-5 w-5 text-green-500" />;
+    switch (outcome.toLowerCase()) {
+      case 'conviction': return <AlertTriangle className="h-5 w-5 text-red-500" />;
+      case 'acquittal': return <CheckCircle className="h-5 w-5 text-green-500" />;
       default: return <FileText className="h-5 w-5 text-gray-500" />;
     }
   };
   
   const getOutcomeColor = (outcome: string) => {
-    switch (outcome) {
-      case 'Conviction': return 'text-red-600';
-      case 'Acquittal': return 'text-green-600';
+    switch (outcome.toLowerCase()) {
+      case 'conviction': return 'text-red-600';
+      case 'acquittal': return 'text-green-600';
       default: return 'text-gray-600';
     }
   };
@@ -92,8 +115,9 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
     return (
       <Card className="mt-4">
         <CardContent className="p-6">
-          <div className="flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center space-y-2">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-legal-primary"></div>
+            <p className="text-sm text-gray-500">Searching for similar cases...</p>
           </div>
         </CardContent>
       </Card>
@@ -104,7 +128,10 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
     return (
       <Card className="mt-4">
         <CardContent className="p-6">
-          <div className="text-red-500 text-center">{error}</div>
+          <div className="text-red-500 text-center">
+            <AlertTriangle className="h-6 w-6 mx-auto mb-2" />
+            <p>{error}</p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -123,12 +150,22 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
   return (
     <Card className="mt-4">
       <CardHeader className="pb-3">
-        <div className="flex items-center">
-          <Database className="h-5 w-5 mr-2 text-legal-primary" />
-          <CardTitle className="text-lg">Similar Criminal Case Precedents</CardTitle>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Database className="h-5 w-5 mr-2 text-legal-primary" />
+            <CardTitle className="text-lg">Similar Criminal Case Precedents</CardTitle>
+          </div>
+          {dataSource === 'Mock' && (
+            <Badge variant="outline" className="bg-yellow-50 text-yellow-800 border-yellow-200">
+              Mock Data
+            </Badge>
+          )}
         </div>
         <p className="text-sm text-gray-500 mt-1">
-          AI-powered analysis of real cases from eCourts service
+          {dataSource === 'AI' 
+            ? 'AI-powered analysis of real cases from eCourts service'
+            : 'Sample case data for demonstration purposes'
+          }
         </p>
       </CardHeader>
       <CardContent>
