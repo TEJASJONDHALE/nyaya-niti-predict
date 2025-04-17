@@ -24,7 +24,7 @@ export const useSimilarCases = (outcome: string) => {
         console.log(`Fetching similar cases for outcome: ${outcome}`);
         
         const response = await fetchSimilarCasesWithAI(outcome);
-        console.log("AI response for similar cases:", response);
+        console.log("Hugging Face API response for similar cases:", response);
         
         let cases: SimilarCase[] = [];
         
@@ -51,21 +51,20 @@ export const useSimilarCases = (outcome: string) => {
         if (cases.length > 0 && isValidCaseData(cases)) {
           setSimilarCases(cases);
           setDataSource('AI');
-          console.log("Using AI-generated data:", cases);
+          console.log("Using AI-generated data from Hugging Face:", cases);
         } else {
-          throw new Error("Invalid or empty case data received from AI");
+          throw new Error("Invalid or empty case data received from Hugging Face API");
         }
         
       } catch (err) {
         console.error('Error fetching similar cases:', err);
-        setError('Failed to fetch similar cases. Please try again later.');
+        setError('Failed to fetch similar cases from Hugging Face API. Please try again later.');
         
-        // Don't fall back to mock data - just show the error
         setSimilarCases([]);
         
         toast({
           title: "Error",
-          description: "Failed to fetch similar cases from eCourt service. Please try again later.",
+          description: "Failed to fetch similar cases from Hugging Face API. Please try again later.",
           variant: "destructive"
         });
       } finally {
