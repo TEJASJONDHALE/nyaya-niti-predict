@@ -1,14 +1,14 @@
 
 import { useState, useEffect } from 'react';
 import { fetchSimilarCasesWithAI } from '@/services/openRouterService';
-import { SimilarCase, AIResponse, CasesResponse } from '@/types/similarCasesTypes';
+import { SimilarCase, AIResponse, CasesResponse, DataSource } from '@/types/similarCasesTypes';
 import { useToast } from "@/hooks/use-toast";
 
 export const useSimilarCases = (outcome: string) => {
   const [similarCases, setSimilarCases] = useState<SimilarCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dataSource, setDataSource] = useState<'AI' | 'Mock'>('AI');
+  const [dataSource, setDataSource] = useState<DataSource>('AI');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -24,44 +24,49 @@ export const useSimilarCases = (outcome: string) => {
         console.log(`Fetching similar cases for outcome: ${outcome}`);
         
         const response = await fetchSimilarCasesWithAI(outcome);
-        console.log("Fetched similar cases:", response);
+        console.log("AI response for similar cases:", response);
         
+        let cases: SimilarCase[] = [];
+        let source: DataSource = 'AI';
+        
+        // Handle different response formats
         if (Array.isArray(response)) {
-          setSimilarCases(response);
-          setDataSource('AI');
+          cases = response;
         } else if (response && typeof response === 'object') {
           if ('cases' in response && Array.isArray((response as CasesResponse).cases)) {
-            setSimilarCases((response as CasesResponse).cases);
-            setDataSource('AI');
+            cases = (response as CasesResponse).cases;
           } else {
-            const possibleArrays = Object.values(response).filter(Array.isArray);
-            if (possibleArrays.length > 0 && possibleArrays[0].length > 0) {
-              setSimilarCases(possibleArrays[0]);
-              setDataSource('AI');
-            } else {
-              console.warn('Could not extract cases array from response, using mock data');
-              setDataSource('Mock');
+            // Try to extract arrays from the response
+            const possibleArrays = Object.values(response).filter(val => 
+              Array.isArray(val) && val.length > 0 && 
+              val[0] && typeof val[0] === 'object' && 'id' in val[0]
+            );
+            
+            if (possibleArrays.length > 0) {
+              cases = possibleArrays[0] as SimilarCase[];
             }
           }
+        }
+        
+        // Validate that we have valid case data
+        if (cases.length > 0 && isValidCaseData(cases)) {
+          setSimilarCases(cases);
+          setDataSource('AI');
+          console.log("Using AI-generated data:", cases);
         } else {
-          console.warn('Unexpected format for similar cases response', response);
-          setDataSource('Mock');
+          throw new Error("Invalid or empty case data received from AI");
         }
-
-        if (dataSource === 'Mock') {
-          toast({
-            title: "Using Mock Data",
-            description: "Could not retrieve AI-generated similar cases. Using mock data instead.",
-            variant: "default"
-          });
-        }
+        
       } catch (err) {
         console.error('Error fetching similar cases:', err);
         setError('Failed to fetch similar cases');
-        setDataSource('Mock');
+        
+        // Don't fall back to mock data - just show the error
+        setSimilarCases([]);
+        
         toast({
           title: "Error",
-          description: "Failed to fetch similar cases. Using mock data instead.",
+          description: "Failed to fetch similar cases. Please try again later.",
           variant: "destructive"
         });
       } finally {
@@ -71,6 +76,24 @@ export const useSimilarCases = (outcome: string) => {
 
     fetchCases();
   }, [outcome, toast]);
+
+  // Helper function to validate case data
+  const isValidCaseData = (data: any[]): data is SimilarCase[] => {
+    if (!Array.isArray(data) || data.length === 0) return false;
+    
+    // Check the first item to see if it has the required fields
+    const firstItem = data[0];
+    return (
+      typeof firstItem === 'object' &&
+      'id' in firstItem &&
+      'title' in firstItem &&
+      'court' in firstItem &&
+      'date' in firstItem &&
+      'outcome' in firstItem &&
+      'keyFacts' in firstItem &&
+      Array.isArray(firstItem.keyFacts)
+    );
+  };
 
   return { similarCases, loading, error, dataSource };
 };

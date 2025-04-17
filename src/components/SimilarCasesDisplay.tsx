@@ -33,17 +33,14 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
             <Database className="h-5 w-5 mr-2 text-legal-primary" />
             <CardTitle className="text-lg">Similar Criminal Case Precedents</CardTitle>
           </div>
-          {dataSource === 'Mock' && (
-            <Badge variant="outline" className="bg-yellow-50 text-yellow-800 border-yellow-200">
-              Mock Data
+          {dataSource === 'AI' && (
+            <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+              AI Generated
             </Badge>
           )}
         </div>
         <p className="text-sm text-gray-500 mt-1">
-          {dataSource === 'AI' 
-            ? 'AI-powered analysis of real cases from eCourts service'
-            : 'Sample case data for demonstration purposes'
-          }
+          AI-powered analysis of real cases from eCourts service
         </p>
       </CardHeader>
       <CardContent>

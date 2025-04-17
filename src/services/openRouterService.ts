@@ -148,8 +148,8 @@ Important guidelines:
 
     const apiKey = getApiKey();
     if (!apiKey) {
-      console.warn('OpenRouter API key not found, using mock data');
-      return mockSimilarCases(outcome);
+      console.error('OpenRouter API key not found');
+      throw new Error('API key not configured');
     }
 
     const response = await fetch(API_URL, {
@@ -179,8 +179,7 @@ Important guidelines:
     
     if (!response.ok) {
       console.error('OpenRouter API error:', data);
-      console.warn('Falling back to mock similar cases data');
-      return mockSimilarCases(outcome);
+      throw new Error(data.error?.message || 'Failed to get similar cases from AI');
     }
 
     try {
@@ -189,13 +188,11 @@ Important guidelines:
       return parsedResponse;
     } catch (error) {
       console.error('Failed to parse AI response:', error);
-      console.warn('Falling back to mock similar cases data');
-      return mockSimilarCases(outcome);
+      throw new Error('Invalid response format from AI');
     }
   } catch (error) {
     console.error('Error fetching similar cases with AI:', error);
-    console.warn('Falling back to mock similar cases data');
-    return mockSimilarCases(outcome);
+    throw error;
   }
 };
 
