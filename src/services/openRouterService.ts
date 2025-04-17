@@ -1,11 +1,9 @@
 import { PredictionResult } from '@/utils/mockData';
 
-const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-
-// Function to get the API key - uses window.env for client-side access
-const getApiKey = () => {
-  // For now, using the provided API key
-  return "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";
+// Function to get the Hugging Face API key
+const getHuggingFaceApiKey = () => {
+  // Using the provided API key
+  return "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";
 };
 
 // Mock similar cases for fallback
@@ -119,9 +117,15 @@ const mockSimilarCases = (outcome: string) => {
   return outcome.toLowerCase().includes('acquit') ? acquittalCases : convictionCases;
 };
 
-// Function to fetch similar cases using AI
+// Function to fetch similar cases using Hugging Face API
 export const fetchSimilarCasesWithAI = async (outcome: string): Promise<any[]> => {
   try {
+    const apiKey = getHuggingFaceApiKey();
+    if (!apiKey) {
+      console.error('Hugging Face API key not found');
+      throw new Error('API key not configured');
+    }
+
     const prompt = `
 You are an AI legal research assistant specializing in finding similar criminal case precedents from Indian courts.
 
@@ -146,48 +150,44 @@ Important guidelines:
 - Focus on recent cases (last 10-15 years)
 `;
 
-    const apiKey = getApiKey();
-    if (!apiKey) {
-      console.error('OpenRouter API key not found');
-      throw new Error('API key not configured');
-    }
-
-    const response = await fetch(API_URL, {
+    const HF_API_URL = 'https://api-inference.huggingface.co/models/meta-llama/Llama-2-70b-chat-hf';
+    
+    const response = await fetch(HF_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': window.location.origin,
-        'X-Title': 'Legal Case Predictor'
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-4-maverick:free',
-        messages: [
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,
-        max_tokens: 1500,
-        response_format: { type: "json_object" },
-        // Allow prompt training and data usage
-        transforms: ["promptimagescale"],
-        route: "fallback",
-        allow_data_use: true
+        inputs: prompt,
+        parameters: {
+          temperature: 0.3,
+          max_new_tokens: 1500,
+          return_full_text: false
+        }
       })
     });
 
-    const data = await response.json();
-    
     if (!response.ok) {
-      console.error('OpenRouter API error:', data);
-      throw new Error(data.error?.message || 'Failed to get similar cases from AI');
+      const error = await response.json();
+      console.error('Hugging Face API error:', error);
+      throw new Error(error.error || 'Failed to get similar cases from Hugging Face API');
     }
 
+    const data = await response.json();
+    
     try {
-      const content = data.choices[0].message.content;
+      let content = data[0]?.generated_text;
+      
+      const jsonMatch = content.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        content = jsonMatch[0];
+      }
+      
       const parsedResponse = JSON.parse(content);
       return parsedResponse;
     } catch (error) {
-      console.error('Failed to parse AI response:', error);
+      console.error('Failed to parse AI response:', error, 'Raw response:', data);
       throw new Error('Invalid response format from AI');
     }
   } catch (error) {
@@ -204,9 +204,9 @@ export const generatePredictionWithAI = async (
   caseFacts: string = ""
 ): Promise<PredictionResult> => {
   try {
-    const apiKey = getApiKey();
+    const apiKey = getHuggingFaceApiKey();
     if (!apiKey) {
-      throw new Error('OpenRouter API key not found');
+      throw new Error('Hugging Face API key not found');
     }
 
     const prompt = `
@@ -233,42 +233,44 @@ Provide the response in a strict JSON format with these fields:
 
 Ensure high accuracy and detailed analysis based on legal precedents.`;
 
-    const response = await fetch(API_URL, {
+    const HF_API_URL = 'https://api-inference.huggingface.co/models/meta-llama/Llama-2-70b-chat-hf';
+    
+    const response = await fetch(HF_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': window.location.origin,
-        'X-Title': 'Legal Case Predictor'
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-4-maverick:free',
-        messages: [
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,
-        max_tokens: 1500,
-        response_format: { type: "json_object" },
-        // Allow prompt training and data usage
-        transforms: ["promptimagescale"],
-        route: "fallback",
-        allow_data_use: true
+        inputs: prompt,
+        parameters: {
+          temperature: 0.3,
+          max_new_tokens: 1500,
+          return_full_text: false
+        }
       })
     });
 
-    const data = await response.json();
-    
     if (!response.ok) {
-      console.error('OpenRouter API error:', data);
-      throw new Error(data.error?.message || 'Failed to get prediction from AI');
+      const error = await response.json();
+      console.error('Hugging Face API error:', error);
+      throw new Error(error.error || 'Failed to get prediction from Hugging Face API');
     }
 
+    const data = await response.json();
+    
     try {
-      const content = data.choices[0].message.content;
+      let content = data[0]?.generated_text;
+      
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        content = jsonMatch[0];
+      }
+      
       const prediction = JSON.parse(content);
       return prediction;
     } catch (error) {
-      console.error('Failed to parse AI response:', error);
+      console.error('Failed to parse AI response:', error, 'Raw response:', data);
       throw new Error('Invalid response format from AI');
     }
   } catch (error) {

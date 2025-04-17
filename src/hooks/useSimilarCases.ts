@@ -27,7 +27,6 @@ export const useSimilarCases = (outcome: string) => {
         console.log("AI response for similar cases:", response);
         
         let cases: SimilarCase[] = [];
-        let source: DataSource = 'AI';
         
         // Handle different response formats
         if (Array.isArray(response)) {
@@ -59,14 +58,14 @@ export const useSimilarCases = (outcome: string) => {
         
       } catch (err) {
         console.error('Error fetching similar cases:', err);
-        setError('Failed to fetch similar cases');
+        setError('Failed to fetch similar cases. Please try again later.');
         
         // Don't fall back to mock data - just show the error
         setSimilarCases([]);
         
         toast({
           title: "Error",
-          description: "Failed to fetch similar cases. Please try again later.",
+          description: "Failed to fetch similar cases from eCourt service. Please try again later.",
           variant: "destructive"
         });
       } finally {
