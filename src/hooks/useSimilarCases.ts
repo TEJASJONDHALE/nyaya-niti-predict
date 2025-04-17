@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { fetchSimilarCasesWithAI } from '@/services/openRouterService';
+import { fetchSimilarCasesWithAI } from '@/services/huggingFaceService';
 import { SimilarCase, AIResponse, CasesResponse, DataSource } from '@/types/similarCasesTypes';
 import { useToast } from "@/hooks/use-toast";
 

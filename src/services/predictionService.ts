@@ -1,10 +1,11 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { PredictionResult } from '@/utils/mockData';
 import { mockPrediction } from '@/utils/mockData'; 
 import { isSupabaseConfigured, getMockOrRealSupabase } from '@/lib/supabase';
-import { generatePredictionWithAI } from './openRouterService';
+import { generatePredictionWithAI } from './huggingFaceService';
 
-// Get a prediction from OpenRouter AI or fallback to mock data
+// Get a prediction from Hugging Face AI or fallback to mock data
 export const getPrediction = async (
   caseType: string,
   witnessCount: number,
@@ -12,7 +13,7 @@ export const getPrediction = async (
   caseFacts: string = ""
 ): Promise<PredictionResult | null> => {
   try {
-    // Use OpenRouter AI for prediction
+    // Use Hugging Face API for prediction
     const result = await generatePredictionWithAI(
       caseType, 
       witnessCount, 
@@ -22,7 +23,7 @@ export const getPrediction = async (
     
     return result;
   } catch (error) {
-    console.error('Error getting prediction from OpenRouter:', error);
+    console.error('Error getting prediction from Hugging Face:', error);
     console.warn('Falling back to mock prediction data.');
     // Fall back to mock prediction on error
     return mockPrediction(caseType, witnessCount, evidenceStrength);
