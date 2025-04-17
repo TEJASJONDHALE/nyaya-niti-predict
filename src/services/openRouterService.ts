@@ -3,7 +3,7 @@ import { PredictionResult } from '@/utils/mockData';
 
 // Function to get the Hugging Face API key
 const getHuggingFaceApiKey = () => {
-  // Using the provided API key
+  // Using the correct API key format
   return "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";
 };
 
@@ -40,6 +40,7 @@ Important guidelines:
 - Focus on recent cases (last 10-15 years)
 `;
 
+    console.log(`Sending request to Hugging Face API with key: ${apiKey.substring(0, 5)}...`);
     const HF_API_URL = 'https://api-inference.huggingface.co/models/meta-llama/Llama-2-70b-chat-hf';
     
     const response = await fetch(HF_API_URL, {
@@ -59,22 +60,33 @@ Important guidelines:
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      console.error('Hugging Face API error:', error);
-      throw new Error(error.error || 'Failed to get similar cases from Hugging Face API');
+      const errorResponse = await response.json();
+      console.error('Hugging Face API error:', errorResponse);
+      throw new Error(errorResponse.error || 'Failed to get similar cases from Hugging Face API');
     }
 
     const data = await response.json();
+    console.log("Raw Hugging Face API response:", data);
     
     try {
       let content = data[0]?.generated_text;
+      if (!content) {
+        throw new Error('Empty response from Hugging Face API');
+      }
       
+      console.log("Generated text content:", content);
+      
+      // Find JSON content within the response
       const jsonMatch = content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
         content = jsonMatch[0];
+        console.log("Extracted JSON content:", content);
+      } else {
+        console.warn("Could not extract JSON from response, using full text");
       }
       
       const parsedResponse = JSON.parse(content);
+      console.log("Successfully parsed response:", parsedResponse);
       return parsedResponse;
     } catch (error) {
       console.error('Failed to parse AI response:', error, 'Raw response:', data);
@@ -123,6 +135,7 @@ Provide the response in a strict JSON format with these fields:
 
 Ensure high accuracy and detailed analysis based on legal precedents.`;
 
+    console.log(`Sending prediction request to Hugging Face API with key: ${apiKey.substring(0, 5)}...`);
     const HF_API_URL = 'https://api-inference.huggingface.co/models/meta-llama/Llama-2-70b-chat-hf';
     
     const response = await fetch(HF_API_URL, {
@@ -142,25 +155,36 @@ Ensure high accuracy and detailed analysis based on legal precedents.`;
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      console.error('Hugging Face API error:', error);
-      throw new Error(error.error || 'Failed to get prediction from Hugging Face API');
+      const errorResponse = await response.json();
+      console.error('Hugging Face API error:', errorResponse);
+      throw new Error(errorResponse.error || 'Failed to get prediction from Hugging Face API');
     }
 
     const data = await response.json();
+    console.log("Raw Hugging Face API prediction response:", data);
     
     try {
       let content = data[0]?.generated_text;
+      if (!content) {
+        throw new Error('Empty response from Hugging Face API');
+      }
       
+      console.log("Generated prediction text content:", content);
+      
+      // Find JSON content within the response
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         content = jsonMatch[0];
+        console.log("Extracted prediction JSON content:", content);
+      } else {
+        console.warn("Could not extract JSON from prediction response, using full text");
       }
       
       const prediction = JSON.parse(content);
+      console.log("Successfully parsed prediction response:", prediction);
       return prediction;
     } catch (error) {
-      console.error('Failed to parse AI response:', error, 'Raw response:', data);
+      console.error('Failed to parse AI prediction response:', error, 'Raw response:', data);
       throw new Error('Invalid response format from AI');
     }
   } catch (error) {
