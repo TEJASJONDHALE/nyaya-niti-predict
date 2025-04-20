@@ -42,7 +42,7 @@ const ApiKeySettings = () => {
         <div className="flex gap-2">
           <Input
             type="password"
-            placeholder="Enter your API key"
+            placeholder="AIzaSyBa0Du9eLTg8Ht6wgfvGq8C7AhKxYu0wKY"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
           />
