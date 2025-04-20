@@ -9,7 +9,7 @@ const ApiKeySettings = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const savedKey = localStorage.getItem('perplexityApiKey');
+    const savedKey = localStorage.getItem('geminiApiKey');
     if (savedKey) {
       setApiKey(savedKey);
     }
@@ -25,7 +25,7 @@ const ApiKeySettings = () => {
       return;
     }
 
-    localStorage.setItem('perplexityApiKey', apiKey);
+    localStorage.setItem('geminiApiKey', apiKey);
     toast({
       title: "Success",
       description: "API key saved successfully",
@@ -34,10 +34,10 @@ const ApiKeySettings = () => {
 
   return (
     <div className="p-4 border rounded-lg space-y-4">
-      <h3 className="font-medium">Perplexity AI Settings</h3>
+      <h3 className="font-medium">Google Gemini AI Settings</h3>
       <div className="space-y-2">
         <p className="text-sm text-gray-500">
-          Enter your Perplexity AI API key to enable predictions
+          Enter your Gemini AI API key to enable predictions. You can get a free API key from the Google AI Studio.
         </p>
         <div className="flex gap-2">
           <Input

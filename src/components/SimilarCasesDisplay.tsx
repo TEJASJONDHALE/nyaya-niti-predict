@@ -34,7 +34,7 @@ const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) =>
             <CardTitle className="text-lg">Similar Criminal Case Precedents</CardTitle>
           </div>
           <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-            Hugging Face AI
+            Google Gemini AI
           </Badge>
         </div>
         <p className="text-sm text-gray-500 mt-1">

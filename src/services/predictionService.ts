@@ -2,7 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { PredictionResult } from '@/utils/mockData';
 import { mockPrediction } from '@/utils/mockData'; 
 import { isSupabaseConfigured, getMockOrRealSupabase } from '@/lib/supabase';
-import { generatePredictionWithAI } from './perplexityService';
+import { generatePredictionWithAI } from './geminiService';
 
 // Get a prediction from Perplexity AI or fallback to mock data
 export const getPrediction = async (
