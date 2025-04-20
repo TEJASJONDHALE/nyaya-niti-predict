@@ -1,11 +1,10 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { PredictionResult } from '@/utils/mockData';
 import { mockPrediction } from '@/utils/mockData'; 
 import { isSupabaseConfigured, getMockOrRealSupabase } from '@/lib/supabase';
-import { generatePredictionWithAI } from './huggingFaceService';
+import { generatePredictionWithAI } from './perplexityService';
 
-// Get a prediction from Hugging Face AI or fallback to mock data
+// Get a prediction from Perplexity AI or fallback to mock data
 export const getPrediction = async (
   caseType: string,
   witnessCount: number,
@@ -13,7 +12,7 @@ export const getPrediction = async (
   caseFacts: string = ""
 ): Promise<PredictionResult | null> => {
   try {
-    // Use Hugging Face API for prediction
+    // Use Perplexity AI for prediction
     const result = await generatePredictionWithAI(
       caseType, 
       witnessCount, 
@@ -23,7 +22,7 @@ export const getPrediction = async (
     
     return result;
   } catch (error) {
-    console.error('Error getting prediction from Hugging Face:', error);
+    console.error('Error getting prediction from Perplexity:', error);
     console.warn('Falling back to mock prediction data.');
     // Fall back to mock prediction on error
     return mockPrediction(caseType, witnessCount, evidenceStrength);
