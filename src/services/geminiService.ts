@@ -1,10 +1,10 @@
-
 // Function to get similar cases using Gemini AI
 export const fetchSimilarCasesWithAI = async (outcome: string): Promise<any[]> => {
   try {
-    const apiKey = localStorage.getItem('geminiApiKey');
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    console.log('Gemini API Key configured:', !!apiKey); // Log if API key exists
     if (!apiKey) {
-      throw new Error('Please enter your Gemini API key in the settings');
+      throw new Error('Gemini API key is not configured. Please set VITE_GEMINI_API_KEY in your .env file');
     }
 
     const prompt = `
@@ -24,7 +24,8 @@ Provide the response in a strict JSON format with these exact fields:
   "keyFacts": ["concise key fact 1", "concise key fact 2", "concise key fact 3"]
 }]`;
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
+    console.log('Making request to Gemini API...');
+    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -46,9 +47,10 @@ Provide the response in a strict JSON format with these exact fields:
       }),
     });
 
+    console.log('Gemini API Response Status:', response.status);
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Gemini API error:', errorData);
+      console.error('Gemini API error details:', errorData);
       throw new Error(errorData.error?.message || 'Failed to get similar cases from Gemini AI');
     }
 

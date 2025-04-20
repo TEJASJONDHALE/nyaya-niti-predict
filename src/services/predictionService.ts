@@ -2,9 +2,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { PredictionResult } from '@/utils/mockData';
 import { mockPrediction } from '@/utils/mockData'; 
 import { isSupabaseConfigured, getMockOrRealSupabase } from '@/lib/supabase';
-import { generatePredictionWithAI } from './geminiService';
 
-// Get a prediction from Perplexity AI or fallback to mock data
+// Get a prediction from Gemini AI or fallback to mock data
 export const getPrediction = async (
   caseType: string,
   witnessCount: number,
@@ -12,17 +11,83 @@ export const getPrediction = async (
   caseFacts: string = ""
 ): Promise<PredictionResult | null> => {
   try {
-    // Use Perplexity AI for prediction
-    const result = await generatePredictionWithAI(
-      caseType, 
-      witnessCount, 
-      evidenceStrength, 
-      caseFacts
-    );
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('Gemini API key is not configured. Please set VITE_GEMINI_API_KEY in your .env file');
+    }
+
+    const prompt = `
+You are an AI legal assistant analyzing criminal cases to predict outcomes. Based on the following case details, predict the likely outcome and provide key factors:
+
+Case Type: ${caseType}
+Number of Witnesses: ${witnessCount}
+Evidence Strength: ${evidenceStrength}
+Case Facts: ${caseFacts}
+
+Provide the response in a strict JSON format with these fields:
+{
+  "outcome": "Conviction" or "Acquittal",
+  "confidence": number between 0 and 1,
+  "explanation": "detailed explanation string",
+  "factors": [
+    {
+      "factor": "factor name string",
+      "importance": number between 0 and 1,
+      "reference": "specific reference to case details"
+    }
+  ]
+}`;
+
+    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.2,
+          topK: 40,
+          topP: 0.8,
+          maxOutputTokens: 1000,
+        },
+        safetySettings: []
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Gemini API error:', errorData);
+      throw new Error(errorData.error?.message || 'Failed to get prediction from Gemini AI');
+    }
+
+    const data = await response.json();
+    console.log("Raw Gemini API prediction response:", data);
     
-    return result;
+    try {
+      const content = data.candidates[0]?.content?.parts[0]?.text;
+      if (!content) {
+        throw new Error('Empty response from Gemini AI');
+      }
+      
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const prediction = JSON.parse(jsonMatch[0]);
+        console.log("Successfully parsed prediction response:", prediction);
+        return prediction;
+      }
+      throw new Error('Invalid JSON format in response');
+    } catch (error) {
+      console.error('Failed to parse AI prediction response:', error);
+      throw new Error('Invalid response format from AI');
+    }
   } catch (error) {
-    console.error('Error getting prediction from Perplexity:', error);
+    console.error('Error getting prediction from Gemini:', error);
     console.warn('Falling back to mock prediction data.');
     // Fall back to mock prediction on error
     return mockPrediction(caseType, witnessCount, evidenceStrength);

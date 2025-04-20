@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { fetchSimilarCasesWithAI } from '@/services/geminiService';
 import { SimilarCase, AIResponse, CasesResponse, DataSource } from '@/types/similarCasesTypes';
@@ -58,13 +57,13 @@ export const useSimilarCases = (outcome: string) => {
         
       } catch (err) {
         console.error('Error fetching similar cases:', err);
-        setError('Failed to fetch similar cases from Perplexity API. Please try again later.');
+        setError('Failed to fetch similar cases from Gemini AI. Please try again later.');
         
         setSimilarCases([]);
         
         toast({
           title: "Error",
-          description: "Failed to fetch similar cases from Perplexity API. Please try again later.",
+          description: "Failed to fetch similar cases from Gemini AI. Please try again later.",
           variant: "destructive"
         });
       } finally {
