@@ -1,73 +1,66 @@
-# Welcome to your Lovable project
+# Nyaya Niti Predict
 
-## Project info
+A legal case prediction system that helps analyze criminal cases and predict potential outcomes based on historical data and case characteristics.
 
-**URL**: https://lovable.dev/projects/a6c5c400-c469-4d9c-9310-9622a7c20753
+## Features
 
-## How can I edit this code?
+- Case Analysis: Input case details including FIR information, witness count, and crime type
+- Outcome Prediction: Get predictions based on similar historical cases
+- Case History: View and analyze past cases with similar characteristics
+- FIR Tracking: Detailed tracking of FIR numbers, sections, and dates
+- Similar Cases: View similar criminal case precedents with matching outcomes
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a6c5c400-c469-4d9c-9310-9622a7c20753) and start prompting.
+- Node.js (v18 or higher)
+- npm or yarn
 
-Changes made via Lovable will be committed automatically to this repo.
+### Installation
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/nyaya-niti-predict.git
+cd nyaya-niti-predict
 ```
 
-**Edit a file directly in GitHub**
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Start the development server:
+```bash
+npm run dev
+# or
+yarn dev
+```
 
-**Use GitHub Codespaces**
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Usage
 
-## What technologies are used for this project?
+1. Enter case details including:
+   - Crime type
+   - Number of witnesses
+   - FIR section
+   - Case facts
 
-This project is built with:
+2. View the prediction results including:
+   - Predicted outcome
+   - Confidence level
+   - Key factors affecting the prediction
+   - Similar case precedents
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+3. Analyze similar cases with matching outcomes to understand the basis of the prediction.
 
-## How can I deploy this project?
+## Contributing
 
-Simply open [Lovable](https://lovable.dev/projects/a6c5c400-c469-4d9c-9310-9622a7c20753) and click on Share -> Publish.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Can I connect a custom domain to my Lovable project?
+## License
 
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
