@@ -1,4 +1,3 @@
-
 export interface SimilarCase {
   id: string;
   title: string;
@@ -8,6 +7,9 @@ export interface SimilarCase {
   crimeType: string;
   relevance: number;
   keyFacts: string[];
+  firNumber: string;
+  firSection: string;
+  firDate: string;
 }
 
 export interface CasesResponse {

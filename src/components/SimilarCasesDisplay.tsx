@@ -1,50 +1,28 @@
-
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Database } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { useSimilarCases } from '@/hooks/useSimilarCases';
-import { SimilarCasesDisplayProps } from '@/types/similarCasesTypes';
-import LoadingState from './similar-cases/LoadingState';
-import ErrorState from './similar-cases/ErrorState';
-import EmptyState from './similar-cases/EmptyState';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { similarCases } from '@/utils/mockData';
 import SimilarCaseCard from './similar-cases/SimilarCaseCard';
 
+interface SimilarCasesDisplayProps {
+  outcome: string;
+}
+
 const SimilarCasesDisplay: React.FC<SimilarCasesDisplayProps> = ({ outcome }) => {
-  const { similarCases, loading, error, dataSource } = useSimilarCases(outcome);
-
-  if (loading) {
-    return <LoadingState />;
-  }
-
-  if (error) {
-    return <ErrorState error={error} />;
-  }
-
-  if (similarCases.length === 0) {
-    return <EmptyState />;
-  }
-
+  // Filter similar cases based on outcome
+  const filteredCases = similarCases.filter(caseItem => caseItem.outcome === outcome);
+  
   return (
-    <Card className="mt-4">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Database className="h-5 w-5 mr-2 text-legal-primary" />
-            <CardTitle className="text-lg">Similar Criminal Case Precedents</CardTitle>
-          </div>
-          <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-            Google Gemini AI
-          </Badge>
+    <Card className="legal-card mt-6">
+      <CardHeader className="bg-gray-50 rounded-t-lg border-b border-gray-100">
+        <div className="flex items-center space-x-2">
+          <CardTitle className="text-lg text-legal-primary">Similar Criminal Case Precedents</CardTitle>
         </div>
-        <p className="text-sm text-gray-500 mt-1">
-          AI-powered analysis of real cases from eCourts service
-        </p>
+        <CardDescription>Historical cases with similar characteristics and outcomes</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <div className="space-y-4">
-          {similarCases.map((scase) => (
-            <SimilarCaseCard key={scase.id} caseData={scase} />
+          {filteredCases.map((caseItem) => (
+            <SimilarCaseCard key={caseItem.id} caseData={caseItem} />
           ))}
         </div>
       </CardContent>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,7 +19,7 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
   const [court, setCourt] = useState('');
   const [crimeType, setCrimeType] = useState('');
   const [witnessCount, setWitnessCount] = useState(3);
-  const [evidenceStrength, setEvidenceStrength] = useState('Moderate');
+  const [firSection, setFirSection] = useState('');
   const [caseFacts, setCaseFacts] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -31,6 +30,19 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
     'Fraud',
     'Homicide',
     'Drug Possession',
+  ];
+  
+  const firSections = [
+    'IPC 302 - Murder',
+    'IPC 376 - Rape',
+    'IPC 379 - Theft',
+    'IPC 420 - Cheating',
+    'IPC 323 - Voluntarily causing hurt',
+    'IPC 504 - Intentional insult',
+    'NDPS Act 20 - Drug Possession',
+    'IPC 307 - Attempt to murder',
+    'IPC 406 - Criminal breach of trust',
+    'IPC 498A - Cruelty by husband or relatives'
   ];
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,13 +57,22 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
       return;
     }
     
+    if (!firSection) {
+      toast({
+        title: 'FIR Section Required',
+        description: 'Please select the FIR section under which the case is registered.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
       const result = await getPrediction(
         `Criminal - ${crimeType}`, 
         witnessCount, 
-        evidenceStrength,
+        firSection,
         caseFacts
       );
       
@@ -101,70 +122,52 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
               required
             />
             <p className="text-xs text-gray-500">
-              Provide specific details about the crime, circumstances, and evidence for more accurate AI analysis
+              Provide specific details about the crime, circumstances, and FIR details for more accurate AI analysis
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="court" className="flex items-center">
-                Court <span className="text-red-500 ml-1">*</span>
-              </Label>
-              <Select value={court} onValueChange={setCourt} required>
-                <SelectTrigger id="court">
-                  <SelectValue placeholder="Select court" />
-                </SelectTrigger>
-                <SelectContent>
-                  {courts.map((c) => (
-                    <SelectItem key={c} value={c}>{c}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="crimeType" className="flex items-center">
-                Crime Type <span className="text-red-500 ml-1">*</span>
-              </Label>
-              <Select value={crimeType} onValueChange={setCrimeType} required>
-                <SelectTrigger id="crimeType">
-                  <SelectValue placeholder="Select crime type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {crimeTypes.map((type) => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="crimeType">Crime Type</Label>
+            <Select value={crimeType} onValueChange={setCrimeType}>
+              <SelectTrigger id="crimeType">
+                <SelectValue placeholder="Select crime type" />
+              </SelectTrigger>
+              <SelectContent>
+                {crimeTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="witnessCount" className="flex items-center">
-              Number of Witnesses <span className="text-red-500 ml-1">*</span>
-            </Label>
+            <Label htmlFor="witnessCount">Number of Witnesses</Label>
             <Input
               id="witnessCount"
               type="number"
-              min={0}
-              max={50}
+              min="0"
+              max="20"
               value={witnessCount}
-              onChange={(e) => setWitnessCount(Number(e.target.value))}
-              className="w-full"
-              required
+              onChange={(e) => setWitnessCount(parseInt(e.target.value))}
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="evidenceStrength">Evidence Strength</Label>
-            <Select value={evidenceStrength} onValueChange={setEvidenceStrength}>
-              <SelectTrigger id="evidenceStrength">
-                <SelectValue placeholder="Select evidence strength" />
+            <Label htmlFor="firSection" className="flex items-center">
+              FIR Section <span className="text-red-500 ml-1">*</span>
+            </Label>
+            <Select value={firSection} onValueChange={setFirSection}>
+              <SelectTrigger id="firSection">
+                <SelectValue placeholder="Select FIR section" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Strong">Strong</SelectItem>
-                <SelectItem value="Moderate">Moderate</SelectItem>
-                <SelectItem value="Weak">Weak</SelectItem>
+                {firSections.map((section) => (
+                  <SelectItem key={section} value={section}>
+                    {section}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

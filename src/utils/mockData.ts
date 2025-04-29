@@ -1,4 +1,3 @@
-
 export const caseTypes = [
   'Criminal - Theft',
   'Criminal - Assault',
@@ -25,7 +24,6 @@ export type PredictionResult = {
   outcome: string;
   confidence: number;
   explanation: string;
-  statisticalContext?: string;
   factors: PredictionFactor[];
 };
 
@@ -39,6 +37,9 @@ export const sampleCases = [
     description: 'A case of theft with strong evidence leading to conviction.',
     witnessCount: 4,
     duration: 90,
+    firNumber: 'FIR-123/2023',
+    firSection: 'IPC 379',
+    firDate: '2023-01-15'
   },
   {
     id: '2',
@@ -49,6 +50,9 @@ export const sampleCases = [
     description: 'An assault case with weak evidence leading to acquittal.',
     witnessCount: 2,
     duration: 180,
+    firNumber: 'FIR-456/2023',
+    firSection: 'IPC 323',
+    firDate: '2023-02-20'
   },
   {
     id: '3',
@@ -59,7 +63,79 @@ export const sampleCases = [
     description: 'A drug possession case with strong evidence leading to conviction.',
     witnessCount: 1,
     duration: 60,
+    firNumber: 'FIR-789/2023',
+    firSection: 'NDPS Act 20',
+    firDate: '2023-03-10'
+  }
+];
+
+// Add similar cases with FIR details
+export const similarCases = [
+  {
+    id: 'SC-1',
+    title: 'State vs. John Doe',
+    court: 'District Court',
+    date: '2023-01-15',
+    outcome: 'Conviction',
+    crimeType: 'Theft',
+    relevance: 85,
+    keyFacts: ['Stolen property worth ₹50,000', 'Multiple witnesses', 'CCTV evidence'],
+    firNumber: 'FIR-123/2023',
+    firSection: 'IPC 379',
+    firDate: '2023-01-15'
   },
+  {
+    id: 'SC-2',
+    title: 'State vs. Jane Smith',
+    court: 'High Court',
+    date: '2023-02-20',
+    outcome: 'Acquittal',
+    crimeType: 'Assault',
+    relevance: 75,
+    keyFacts: ['Minor injuries', 'Self-defense claim', 'No prior record'],
+    firNumber: 'FIR-456/2023',
+    firSection: 'IPC 323',
+    firDate: '2023-02-20'
+  },
+  {
+    id: 'SC-3',
+    title: 'State vs. Robert Johnson',
+    court: 'Magistrate Court',
+    date: '2023-03-10',
+    outcome: 'Conviction',
+    crimeType: 'Drug Possession',
+    relevance: 90,
+    keyFacts: ['Commercial quantity', 'Previous convictions', 'Police raid'],
+    firNumber: 'FIR-789/2023',
+    firSection: 'NDPS Act 20',
+    firDate: '2023-03-10'
+  },
+  {
+    id: 'SC-4',
+    title: 'State vs. Sarah Williams',
+    court: 'District Court',
+    date: '2023-04-05',
+    outcome: 'Conviction',
+    crimeType: 'Fraud',
+    relevance: 80,
+    keyFacts: ['Financial fraud', 'Multiple victims', 'Digital evidence'],
+    firNumber: 'FIR-101/2023',
+    firSection: 'IPC 420',
+    firDate: '2023-04-05'
+  },
+  {
+    id: 'SC-5',
+    title: 'State vs. Michael Brown',
+    court: 'High Court',
+    date: '2023-05-12',
+    outcome: 'Acquittal',
+    crimeType: 'Homicide',
+    relevance: 70,
+    keyFacts: ['Self-defense', 'No premeditation', 'Single witness'],
+    firNumber: 'FIR-202/2023',
+    firSection: 'IPC 302',
+    firDate: '2023-05-12'
+  }
 ];
 
 // Add the missing statisticsData export
@@ -84,7 +160,7 @@ export const statisticsData = {
     'Special Criminal Court': 0.85
   },
   topFactors: [
-    { factor: 'Evidence Strength', importance: 0.85 },
+    { factor: 'FIR Section', importance: 0.85 },
     { factor: 'Witness Count', importance: 0.72 },
     { factor: 'Prior Criminal Record', importance: 0.68 },
     { factor: 'Police Testimony', importance: 0.62 }
@@ -95,7 +171,7 @@ export const statisticsData = {
 export const mockPrediction = (
   caseType: string,
   witnessCount: number,
-  evidenceStrength: string
+  firSection: string
 ): PredictionResult => {
   // Simple logic to determine outcome based on inputs
   let outcome = 'Settlement';
@@ -106,13 +182,13 @@ export const mockPrediction = (
     outcome = 'Conviction';
     confidence = 0.7;
   } 
-  // Strong evidence with few witnesses often leads to settlement
-  else if (evidenceStrength === 'Strong' && witnessCount < 3) {
-    outcome = 'Settlement';
+  // Strong FIR sections often lead to conviction
+  else if (firSection.includes('IPC 302') || firSection.includes('IPC 376')) {
+    outcome = 'Conviction';
     confidence = 0.8;
   } 
-  // Weak evidence often leads to acquittal
-  else if (evidenceStrength === 'Weak') {
+  // Weak FIR sections often lead to acquittal
+  else if (firSection.includes('IPC 323') || firSection.includes('IPC 504')) {
     outcome = 'Acquittal';
     confidence = 0.6;
   }
@@ -141,10 +217,7 @@ export const mockPrediction = (
   confidence = Math.min(Math.max(confidence, 0.3), 0.9);
   
   // Generate mock explanation
-  const explanation = `Based on analysis of 10,000+ similar criminal cases, with ${witnessCount} witnesses and ${evidenceStrength.toLowerCase()} evidence provided in this ${caseType.toLowerCase()} case, our AI model predicts a ${outcome.toLowerCase()} outcome with ${Math.round(confidence * 100)}% confidence.`;
-  
-  // Generate statistical context
-  const statisticalContext = generateStatisticalContext(caseType, witnessCount, evidenceStrength, outcome);
+  const explanation = `Based on analysis of 10,000+ similar criminal cases, with ${witnessCount} witnesses and FIR registered under ${firSection} in this ${caseType.toLowerCase()} case, our AI model predicts a ${outcome.toLowerCase()} outcome with ${Math.round(confidence * 100)}% confidence.`;
   
   // Generate mock factors specific to criminal cases
   const factors: PredictionFactor[] = [
@@ -154,9 +227,9 @@ export const mockPrediction = (
       reference: witnessCount > 3 ? 'Based on 237 similar criminal cases, more than 3 witnesses significantly increases conviction rates by 42%.' : 'Analysis of 185 cases shows fewer witnesses correlate with 37% lower conviction rates.'
     },
     {
-      factor: 'Evidence Strength',
-      importance: evidenceStrength === 'Strong' ? 0.8 : evidenceStrength === 'Moderate' ? 0.5 : 0.2,
-      reference: evidenceStrength === 'Strong' ? 'In 312 analyzed criminal cases with strong evidence, 78% resulted in conviction.' : 'Based on 254 cases, weak evidence led to acquittal in 68% of instances.'
+      factor: 'FIR Section',
+      importance: firSection.includes('IPC 302') || firSection.includes('IPC 376') ? 0.8 : 0.5,
+      reference: firSection.includes('IPC 302') || firSection.includes('IPC 376') ? 'In 312 analyzed criminal cases with serious charges, 78% resulted in conviction.' : 'Based on 254 cases, less serious charges led to acquittal in 68% of instances.'
     }
   ];
   
@@ -204,44 +277,6 @@ export const mockPrediction = (
     outcome,
     confidence,
     explanation,
-    statisticalContext,
     factors
   };
-};
-
-// Helper function to generate statistical context
-const generateStatisticalContext = (
-  caseType: string,
-  witnessCount: number,
-  evidenceStrength: string,
-  outcome: string
-): string => {
-  let context = '';
-  
-  // Add crime type specific context
-  if (caseType.includes('Theft')) {
-    context += `Analysis of 537 theft cases reveals that ${evidenceStrength.toLowerCase()} evidence leads to ${outcome.toLowerCase()} in ${evidenceStrength === 'Strong' ? '82%' : evidenceStrength === 'Moderate' ? '64%' : '37%'} of cases. `;
-  } else if (caseType.includes('Assault')) {
-    context += `Historical data from 412 assault cases demonstrates ${witnessCount > 3 ? 'a strong correlation between multiple witnesses and conviction rates (76% conviction rate)' : 'that cases with few witnesses face challenges in court (43% conviction rate)'}. `;
-  } else if (caseType.includes('Fraud')) {
-    context += `Analysis of 389 fraud cases shows that ${evidenceStrength === 'Strong' ? 'strong documentary evidence is pivotal to successful prosecution (88% conviction rate)' : 'cases without solid documentation face significant hurdles (32% conviction rate)'}. `;
-  } else if (caseType.includes('Homicide')) {
-    context += `Data from 256 homicide proceedings indicates that ${witnessCount > 4 ? 'cases with multiple witnesses show a 79% conviction rate' : 'cases with limited witness testimony have a 51% conviction rate'} when combined with ${evidenceStrength.toLowerCase()} forensic evidence. `;
-  } else if (caseType.includes('Drug')) {
-    context += `Review of 623 drug possession cases shows ${evidenceStrength === 'Strong' ? 'a 91% conviction rate with strong evidence' : 'a significant dependence on evidence quality, with weak evidence leading to only 45% conviction rate'}. `;
-  }
-  
-  // Add witness testimony statistical context
-  if (witnessCount > 4) {
-    context += `Cases with ${witnessCount} or more witnesses have historically shown a 73% higher likelihood of conviction across all criminal types. `;
-  } else if (witnessCount > 2) {
-    context += `Cases with a moderate number of witnesses (${witnessCount}) typically show mixed outcomes depending on witness credibility and consistency. `;
-  } else {
-    context += `Cases with only ${witnessCount} witness(es) face an average 47% lower conviction rate, placing greater emphasis on physical evidence quality. `;
-  }
-  
-  // Add evidence strength context
-  context += `${evidenceStrength} evidence quality has been shown to affect case outcomes by ${evidenceStrength === 'Strong' ? '+64%' : evidenceStrength === 'Moderate' ? '+21%' : '-26%'} in a longitudinal study of 1,250 criminal proceedings over the past decade.`;
-  
-  return context;
 };

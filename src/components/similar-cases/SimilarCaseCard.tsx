@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AlertTriangle, CheckCircle, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +49,21 @@ const SimilarCaseCard: React.FC<SimilarCaseCardProps> = ({ caseData }) => {
           {getOutcomeIcon(caseData.outcome)}
           <span className={`text-sm ml-1 font-medium ${getOutcomeColor(caseData.outcome)}`}>
             {caseData.outcome}
+          </span>
+        </div>
+      </div>
+      
+      <div className="mb-3">
+        <p className="text-sm font-medium mb-1">FIR Details:</p>
+        <div className="flex flex-wrap gap-2">
+          <span className="text-xs bg-blue-100 px-2 py-1 rounded">
+            FIR No: {caseData.firNumber}
+          </span>
+          <span className="text-xs bg-blue-100 px-2 py-1 rounded">
+            Section: {caseData.firSection}
+          </span>
+          <span className="text-xs bg-blue-100 px-2 py-1 rounded">
+            FIR Date: {caseData.firDate}
           </span>
         </div>
       </div>
