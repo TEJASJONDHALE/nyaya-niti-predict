@@ -1,66 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { courts } from '@/utils/mockData';
+import { courts, caseTypes } from '@/utils/mockData';
 import { PredictionResult } from '@/utils/mockData';
 import { FileText, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getPrediction } from '@/services/predictionService';
 
 interface PredictionFormProps {
-  onPredict: (result: PredictionResult, caseId?: string) => void;
+  onPredict: (result: PredictionResult, type: string) => void;
+  resetTrigger: boolean;
 }
 
-const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
-  const [court, setCourt] = useState('');
-  const [crimeType, setCrimeType] = useState('');
-  const [witnessCount, setWitnessCount] = useState(3);
-  const [firSection, setFirSection] = useState('');
-  const [caseFacts, setCaseFacts] = useState('');
+const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict, resetTrigger }) => {
+  const [formData, setFormData] = useState({
+    caseType: '',
+    witnessCount: 0,
+    firSection: ''
+  });
+  const [caseDescription, setCaseDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
-  const crimeTypes = [
-    'Theft',
-    'Assault',
-    'Fraud',
-    'Homicide',
-    'Drug Possession',
-  ];
+  const crimeTypes = caseTypes.map(type => type.replace('Criminal - ', ''));
   
-  const firSections = [
-    'IPC 302 - Murder',
-    'IPC 376 - Rape',
-    'IPC 379 - Theft',
-    'IPC 420 - Cheating',
-    'IPC 323 - Voluntarily causing hurt',
-    'IPC 504 - Intentional insult',
-    'NDPS Act 20 - Drug Possession',
-    'IPC 307 - Attempt to murder',
-    'IPC 406 - Criminal breach of trust',
-    'IPC 498A - Cruelty by husband or relatives'
-  ];
-  
+  useEffect(() => {
+    if (resetTrigger) {
+      setFormData({
+        caseType: '',
+        witnessCount: 0,
+        firSection: ''
+      });
+      setCaseDescription('');
+      setIsSubmitting(false);
+    }
+  }, [resetTrigger]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!caseFacts.trim()) {
+    if (!caseDescription.trim()) {
       toast({
-        title: 'Case Facts Required',
+        title: 'Case Description Required',
         description: 'Please provide details about the case to generate a prediction.',
         variant: 'destructive',
       });
       return;
     }
     
-    if (!firSection) {
+    if (!formData.caseType) {
+      toast({
+        title: 'Crime Type Required',
+        description: 'Please select the type of crime.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    if (!formData.witnessCount || formData.witnessCount < 0) {
+      toast({
+        title: 'Witness Count Required',
+        description: 'Please enter the number of witnesses.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    if (!formData.firSection) {
       toast({
         title: 'FIR Section Required',
-        description: 'Please select the FIR section under which the case is registered.',
+        description: 'Please enter the FIR section under which the case is registered.',
         variant: 'destructive',
       });
       return;
@@ -70,17 +83,17 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
     
     try {
       const result = await getPrediction(
-        `Criminal - ${crimeType}`, 
-        witnessCount, 
-        firSection,
-        caseFacts
+        `Criminal - ${formData.caseType}`, 
+        formData.witnessCount, 
+        formData.firSection,
+        caseDescription
       );
       
       if (!result) {
         throw new Error('Failed to get prediction');
       }
       
-      onPredict(result);
+      onPredict(result, formData.caseType);
       
       toast({
         title: 'AI Prediction Generated',
@@ -105,19 +118,18 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
           <FileText className="h-5 w-5 text-legal-primary" />
           <CardTitle className="text-lg text-legal-primary">AI Legal Case Predictor</CardTitle>
         </div>
-        <CardDescription>Enter case details to get an AI-powered prediction of the likely outcome</CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="caseFacts" className="flex items-center">
-              Case Facts <span className="text-red-500 ml-1">*</span>
+            <Label htmlFor="caseDescription" className="flex items-center">
+              Case Description <span className="text-red-500 ml-1">*</span>
             </Label>
             <Textarea
-              id="caseFacts"
+              id="caseDescription"
               placeholder="Enter all relevant details about the case..."
-              value={caseFacts}
-              onChange={(e) => setCaseFacts(e.target.value)}
+              value={caseDescription}
+              onChange={(e) => setCaseDescription(e.target.value)}
               className="min-h-[120px] resize-none"
               required
             />
@@ -127,8 +139,10 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="crimeType">Crime Type</Label>
-            <Select value={crimeType} onValueChange={setCrimeType}>
+            <Label htmlFor="crimeType" className="flex items-center">
+              Crime Type <span className="text-red-500 ml-1">*</span>
+            </Label>
+            <Select value={formData.caseType} onValueChange={(value) => setFormData({ ...formData, caseType: value })} required>
               <SelectTrigger id="crimeType">
                 <SelectValue placeholder="Select crime type" />
               </SelectTrigger>
@@ -143,14 +157,17 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="witnessCount">Number of Witnesses</Label>
+            <Label htmlFor="witnessCount" className="flex items-center">
+              Number of Witnesses <span className="text-red-500 ml-1">*</span>
+            </Label>
             <Input
               id="witnessCount"
               type="number"
               min="0"
               max="20"
-              value={witnessCount}
-              onChange={(e) => setWitnessCount(parseInt(e.target.value))}
+              value={formData.witnessCount}
+              onChange={(e) => setFormData({ ...formData, witnessCount: parseInt(e.target.value) })}
+              required
             />
           </div>
           
@@ -158,18 +175,13 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ onPredict }) => {
             <Label htmlFor="firSection" className="flex items-center">
               FIR Section <span className="text-red-500 ml-1">*</span>
             </Label>
-            <Select value={firSection} onValueChange={setFirSection}>
-              <SelectTrigger id="firSection">
-                <SelectValue placeholder="Select FIR section" />
-              </SelectTrigger>
-              <SelectContent>
-                {firSections.map((section) => (
-                  <SelectItem key={section} value={section}>
-                    {section}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="firSection"
+              placeholder="Enter FIR section (e.g., IPC 302)"
+              value={formData.firSection}
+              onChange={(e) => setFormData({ ...formData, firSection: e.target.value })}
+              required
+            />
           </div>
           
           <Button 

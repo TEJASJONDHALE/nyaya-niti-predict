@@ -10,10 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface ResultsDisplayProps {
   result: PredictionResult | null;
-  caseId?: string;
+  similarCases: any[];
+  crimeType: string;
 }
 
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, caseId }) => {
+const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, similarCases, crimeType }) => {
   const [showDetailedExplanation, setShowDetailedExplanation] = useState(false);
   const [isLoadingExplanation, setIsLoadingExplanation] = useState(false);
   const [explanationFactors, setExplanationFactors] = useState<any[]>([]);
@@ -181,7 +182,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, caseId }) => {
       {showDetailedExplanation && (
         <>
           <ExplanationDetail factors={explanationFactors} />
-          <SimilarCasesDisplay outcome={result.outcome} />
+          <SimilarCasesDisplay outcome={result.outcome} crimeType={crimeType} />
         </>
       )}
     </>

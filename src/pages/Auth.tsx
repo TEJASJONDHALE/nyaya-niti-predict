@@ -19,7 +19,7 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-legal-primary mb-2">Nyaya Niti Predict</h1>
-          <p className="text-gray-600">AI-powered legal case outcome prediction</p>
+          <p className="text-gray-600">Case outcome prediction</p>
         </div>
         
         {isSignIn ? (

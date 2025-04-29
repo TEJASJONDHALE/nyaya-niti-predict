@@ -1,9 +1,15 @@
-
 import React from 'react';
-import { Scale, BarChart3, FileText, Home } from 'lucide-react';
+import { Scale, Home, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
 
-const Header = () => {
+interface HeaderProps {
+  onNewPrediction: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onNewPrediction }) => {
+  const { signOut } = useAuth();
+
   return (
     <header className="bg-legal-primary text-white shadow-md">
       <div className="container mx-auto px-4 py-3">
@@ -18,21 +24,23 @@ const Header = () => {
               <Home className="mr-1 h-4 w-4" />
               Dashboard
             </Button>
-            <Button variant="ghost" size="sm" className="text-white hover:bg-legal-primary/60">
-              <FileText className="mr-1 h-4 w-4" />
-              Prediction
-            </Button>
-            <Button variant="ghost" size="sm" className="text-white hover:bg-legal-primary/60">
-              <BarChart3 className="mr-1 h-4 w-4" />
-              Analytics
-            </Button>
           </nav>
           
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm" className="hidden md:flex bg-legal-primary text-white border-white/20 hover:bg-legal-primary/80">
-              Upload Case
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => signOut()}
+              className="text-white hover:bg-legal-primary/60 flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
             </Button>
-            <Button size="sm" className="bg-legal-accent text-legal-dark hover:bg-legal-accent/90">
+            <Button 
+              size="sm" 
+              className="bg-legal-accent text-legal-dark hover:bg-legal-accent/90"
+              onClick={onNewPrediction}
+            >
               New Prediction
             </Button>
           </div>

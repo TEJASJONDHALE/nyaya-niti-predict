@@ -72,69 +72,106 @@ export const sampleCases = [
 // Add similar cases with FIR details
 export const similarCases = [
   {
-    id: 'SC-1',
-    title: 'State vs. John Doe',
-    court: 'District Court',
-    date: '2023-01-15',
-    outcome: 'Conviction',
-    crimeType: 'Theft',
-    relevance: 85,
-    keyFacts: ['Stolen property worth ₹50,000', 'Multiple witnesses', 'CCTV evidence'],
-    firNumber: 'FIR-123/2023',
-    firSection: 'IPC 379',
-    firDate: '2023-01-15'
+    "id": "SC-1",
+    "title": "State vs. Nirav Modi",
+    "court": "Special CBI Court, Mumbai",
+    "date": "2018-02-13",
+    "outcome": "Pending Extradition",
+    "crimeType": "Bank Fraud",
+    "relevance": 95,
+    "keyFacts": [
+      "₹13,700 crore fraud via fake LoUs",
+      "Involvement of PNB officials",
+      "Modi fled to the UK"
+    ],
+    "firNumber": "RCBSM2018E0001",
+    "firSection": "IPC 420, 409, 120B; PMLA",
+    "firDate": "2018-02-13"
   },
   {
-    id: 'SC-2',
-    title: 'State vs. Jane Smith',
-    court: 'High Court',
-    date: '2023-02-20',
-    outcome: 'Acquittal',
-    crimeType: 'Assault',
-    relevance: 75,
-    keyFacts: ['Minor injuries', 'Self-defense claim', 'No prior record'],
-    firNumber: 'FIR-456/2023',
-    firSection: 'IPC 323',
-    firDate: '2023-02-20'
+    "id": "SC-2",
+    "title": "State vs. Vijay Mallya",
+    "court": "Special PMLA Court, Mumbai",
+    "date": "2016-03-09",
+    "outcome": "Declared Fugitive Economic Offender",
+    "crimeType": "Loan Fraud",
+    "relevance": 92,
+    "keyFacts": [
+      "₹9,000 crore default by Kingfisher Airlines",
+      "Mallya fled to the UK",
+      "Extradition proceedings ongoing"
+    ],
+    "firNumber": "RCBSM2016E0002",
+    "firSection": "IPC 420, 120B; PMLA",
+    "firDate": "2016-03-09"
   },
   {
-    id: 'SC-3',
-    title: 'State vs. Robert Johnson',
-    court: 'Magistrate Court',
-    date: '2023-03-10',
-    outcome: 'Conviction',
-    crimeType: 'Drug Possession',
-    relevance: 90,
-    keyFacts: ['Commercial quantity', 'Previous convictions', 'Police raid'],
-    firNumber: 'FIR-789/2023',
-    firSection: 'NDPS Act 20',
-    firDate: '2023-03-10'
+    "id": "SC-3",
+    "title": "State vs. Ramalinga Raju",
+    "court": "CBI Court, Hyderabad",
+    "date": "2009-01-07",
+    "outcome": "Conviction",
+    "crimeType": "Corporate Fraud",
+    "relevance": 90,
+    "keyFacts": [
+      "₹7,000 crore accounting fraud at Satyam Computers",
+      "Falsification of accounts",
+      "Led to stricter corporate governance norms"
+    ],
+    "firNumber": "RCBSH2009E0001",
+    "firSection": "IPC 420, 467, 468, 471, 477A",
+    "firDate": "2009-01-07"
   },
   {
-    id: 'SC-4',
-    title: 'State vs. Sarah Williams',
-    court: 'District Court',
-    date: '2023-04-05',
-    outcome: 'Conviction',
-    crimeType: 'Fraud',
-    relevance: 80,
-    keyFacts: ['Financial fraud', 'Multiple victims', 'Digital evidence'],
-    firNumber: 'FIR-101/2023',
-    firSection: 'IPC 420',
-    firDate: '2023-04-05'
+    "id": "SC-4",
+    "title": "State vs. Ketan Parekh",
+    "court": "Special Court, Mumbai",
+    "date": "2001-03-30",
+    "outcome": "Conviction",
+    "crimeType": "Stock Market Manipulation",
+    "relevance": 88,
+    "keyFacts": [
+      "Manipulated stock prices of K-10 stocks",
+      "Used bank funds for trading",
+      "Barred from trading for 14 years"
+    ],
+    "firNumber": "RCBSM2001E0003",
+    "firSection": "IPC 420, 120B; SEBI Act",
+    "firDate": "2001-03-30"
   },
   {
-    id: 'SC-5',
-    title: 'State vs. Michael Brown',
-    court: 'High Court',
-    date: '2023-05-12',
-    outcome: 'Acquittal',
-    crimeType: 'Homicide',
-    relevance: 70,
-    keyFacts: ['Self-defense', 'No premeditation', 'Single witness'],
-    firNumber: 'FIR-202/2023',
-    firSection: 'IPC 302',
-    firDate: '2023-05-12'
+    "id": "SC-5",
+    "title": "State vs. Sahara India Pariwar",
+    "court": "Supreme Court of India",
+    "date": "2012-08-31",
+    "outcome": "Ordered to Refund ₹24,000 Crore",
+    "crimeType": "Illegal Fundraising",
+    "relevance": 85,
+    "keyFacts": [
+      "Raised funds through OFCDs without SEBI approval",
+      "Ordered to refund investors",
+      "Chairman Subrata Roy jailed for non-compliance"
+    ],
+    "firNumber": "RCBSM2012E0004",
+    "firSection": "SEBI Act violations",
+    "firDate": "2012-08-31"
+  },
+  {
+    "id": "SC-6",
+    "title": "State vs. Saradha Group",
+    "court": "Special Court, Kolkata",
+    "date": "2013-04-23",
+    "outcome": "Investigation Ongoing",
+    "crimeType": "Ponzi Scheme",
+    "relevance": 83,
+    "keyFacts": [
+      "₹2,500 crore chit fund scam",
+      "Affected thousands of investors",
+      "Political links under investigation"
+    ],
+    "firNumber": "RCBSK2013E0005",
+    "firSection": "IPC 420, 406, 120B",
+    "firDate": "2013-04-23"
   }
 ];
 
